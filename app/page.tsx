@@ -52,25 +52,6 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <header className="bg-gray-50 dark:bg-gray-900 border-b border-border shadow-sm">
-        <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">SUNAT Noticias</h1>
-            <nav className="hidden md:flex gap-6">
-              <a href="#" className="hover:text-primary transition-colors text-sm text-foreground">
-                Noticias
-              </a>
-              <a href="#" className="hover:text-primary transition-colors text-sm text-foreground">
-                Categorías
-              </a>
-              <a href="#" className="hover:text-primary transition-colors text-sm text-foreground">
-                Acerca de
-              </a>
-            </nav>
-          </div>
-        </div>
-      </header>
-
       <main className="flex-1 bg-gray-50 dark:bg-gray-900">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
           <div>

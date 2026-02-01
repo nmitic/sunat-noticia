@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1280" height="1024" viewBox="0 0 1280 1024" xml:space="preserve">
+<desc>Created with Fabric.js 5.3.0</desc>
+<defs>
+</defs>
+<g transform="matrix(1 0 0 1 640 512)" id="background-logo"  >
+<rect style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0; fill-rule: nonzero; opacity: 1;"  paint-order="stroke"  x="-640" y="-512" rx="0" ry="0" width="1280" height="1024" />
+</g>
+<g transform="matrix(1.6132540674117946 0 0 1.6132540674117946 260.6968820488722 511.68703007518803)" id="logo-logo"  >
+<g style=""  paint-order="stroke"   >
+		<g transform="matrix(0.06770721560460827 0 0 -0.06770721560460827 -43.844484536920106 -17.58390242859477)"  >
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,87,88); fill-rule: nonzero; opacity: 1;"  paint-order="stroke"  transform=" translate(-722.11, -1458.475)" d="M 1292.63 1349.79 L 976 1349.79 C 967.18 1350.02 951.379 1352.27 944.031 1363.81 C 941.781 1367.74 934.5039999999999 1379.6699999999998 944.199 1399.3 L 1444.22 2397.54 L 661.176 2397.54 L 0 1645.66 L 937.355 519.41 L 1292.63 1349.79" stroke-linecap="round" />
+</g>
+		<g transform="matrix(0.06770721560460827 0 0 -0.06770721560460827 33.17057741128485 0)"  >
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,87,88); fill-rule: nonzero; opacity: 1;"  paint-order="stroke"  transform=" translate(-1859.5819999999999, -1198.77)" d="M 2077.29 2397.54 L 1810.74 2397.54 L 1455.37 1720.3899999999999 L 1836.57 1720.3899999999999 C 1858.98 1720.3899999999999 1864.55 1709.8899999999999 1864.55 1709.8899999999999 C 1869.85 1697.9599999999998 1862.1299999999999 1685.1699999999998 1855.56 1676.2499999999998 L 979.824 468.359 L 1369.65 0 L 2739.34 1645.42 L 2077.29 2397.54" stroke-linecap="round" />
+</g>
+</g>
+</g>
+<g transform="matrix(1.9211538461538462 0 0 1.9211538461538462 820.9810522433175 488.2319201951027)" id="text-logo"  >
+<g style=""  paint-order="stroke"   >
+		<g transform="matrix(1 0 0 1 -5.684342e-14 0)" id="text-logo-path-0"  >
+<path style="stroke: rgb(246,135,18); stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,87,88); fill-rule: nonzero; opacity: 1;"  paint-order="stroke"  transform=" translate(-184.37000000000003, 19.95)" d="M 1.77 0 L 13.96 0 L 16.99 -17.27 L 43.66 -17.27 L 46.57 -34.09 L 40.76 -39.9 L 5.93 -39.9 L 8.21 -36.48 Z M 18.18 -23.88 L 19.78 -33.23 L 34.26 -33.23 L 32.6 -23.88 Z M 58.65 0 L 91.83 0 L 93.02 -6.61 L 71.99 -6.61 L 73.87 -17.27 L 92 -17.27 L 93.2 -23.88 L 75.07 -23.88 L 76.72 -33.29 L 97.7 -33.29 L 98.9 -39.9 L 62.81 -39.9 L 65.09 -36.48 Z M 109.9 0 L 122.09 0 L 125.12 -17.27 L 131.1 -17.27 L 139.48 0 L 151.68 0 L 143.24 -17.27 L 151.79 -17.27 L 154.7 -34.09 L 148.88 -39.9 L 114.06 -39.9 L 116.34 -36.48 Z M 126.31 -23.88 L 127.91 -33.23 L 142.39 -33.23 L 140.73 -23.88 Z M 170.77 -5.81 L 176.59 0 L 205.43 0 L 212.55 -6.73 L 218.42 -39.9 L 206.28 -39.9 L 200.41 -6.67 L 183.14 -6.67 L 188.96 -39.9 L 173.91 -39.9 L 176.19 -36.48 Z M 229.43 0 L 241.57 0 L 246.7 -29.01 L 257.18 0 L 271.04 0 L 278.1 -39.9 L 265.91 -39.9 L 260.83 -10.94 L 250.4 -39.9 L 233.59 -39.9 L 235.87 -36.48 Z M 289.1 0 L 301.25 0 L 308.31 -39.9 L 293.26 -39.9 L 295.55 -36.48 Z M 320.34 -5.81 L 326.15 0 L 360.92 0 L 366.97 -34.09 L 361.15 -39.9 L 323.47 -39.9 L 325.75 -36.48 Z M 332.71 -6.67 L 337.33 -33.23 L 354.65 -33.23 L 349.98 -6.67 Z" stroke-linecap="round" />
+</g>
+</g>
+</g>
+<g transform="matrix(1.9211538461538462 0 0 1.9211538461538462 726.6451633561367 566.9185080561872)" id="tagline-e2affc37-e266-4fc1-97b5-e61d7f6cbae3-logo"  >
+<g style=""  paint-order="stroke"   >
+		<g transform="matrix(1 0 0 1 0 0)" id="tagline-e2affc37-e266-4fc1-97b5-e61d7f6cbae3-logo-path-0"  >
+<path style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,87,88); fill-rule: nonzero; opacity: 1;"  paint-order="stroke"  transform=" translate(-135.18, 7.7)" d="M 1.85 -6.67 L 13.24 -6.67 L 12.52 -2.57 L 1.14 -2.57 L 0.68 0 L 16.74 0 L 17.97 -6.97 L 15.73 -9.22 L 7 -9.22 L 7.63 -12.83 L 12.34 -12.83 L 12.06 -11.18 L 16.76 -11.18 L 17.09 -13.16 L 14.85 -15.4 L 2.29 -15.4 L 3.17 -14.08 Z M 23.69 -2.24 L 25.94 0 L 37.07 0 L 39.82 -2.6 L 42.09 -15.4 L 37.4 -15.4 L 35.13 -2.57 L 28.47 -2.57 L 30.71 -15.4 L 24.9 -15.4 L 25.78 -14.08 Z M 45.91 0 L 50.6 0 L 52.58 -11.2 L 56.63 0 L 61.97 0 L 64.7 -15.4 L 59.99 -15.4 L 58.04 -4.22 L 54.01 -15.4 L 47.52 -15.4 L 48.4 -14.08 Z M 68.53 0 L 73.24 0 L 74.43 -6.67 L 81.09 -6.67 L 79.9 0 L 84.59 0 L 86.92 -13.16 L 84.68 -15.4 L 70.14 -15.4 L 71.02 -14.08 Z M 74.87 -9.22 L 75.5 -12.85 L 82.17 -12.85 L 81.53 -9.22 Z M 107.27 -15.4 L 92.75 -15.4 L 93.63 -14.08 L 93.41 -12.85 L 98.03 -12.85 L 95.77 0 L 100.47 0 L 102.74 -12.85 L 106.81 -12.85 Z M 119.48 0 L 124.17 0 L 126.15 -11.2 L 130.2 0 L 135.54 0 L 138.27 -15.4 L 133.56 -15.4 L 131.6 -4.22 L 127.58 -15.4 L 121.09 -15.4 L 121.97 -14.08 Z M 142.49 -2.24 L 144.74 0 L 158.16 0 L 160.49 -13.16 L 158.25 -15.4 L 143.7 -15.4 L 144.58 -14.08 Z M 147.27 -2.57 L 149.05 -12.83 L 155.74 -12.83 L 153.93 -2.57 Z M 180.84 -15.4 L 166.32 -15.4 L 167.2 -14.08 L 166.98 -12.85 L 171.6 -12.85 L 169.33 0 L 174.04 0 L 176.31 -12.85 L 180.38 -12.85 Z M 184.67 0 L 189.35 0 L 192.08 -15.4 L 186.27 -15.4 L 187.15 -14.08 Z M 196.31 -2.24 L 198.55 0 L 211.97 0 L 212.87 -5.13 L 208.19 -5.13 L 207.75 -2.57 L 201.08 -2.57 L 202.86 -12.83 L 209.55 -12.83 L 209.15 -10.67 L 213.86 -10.67 L 214.3 -13.16 L 212.06 -15.4 L 197.52 -15.4 L 198.4 -14.08 Z M 218.53 0 L 223.21 0 L 225.94 -15.4 L 220.13 -15.4 L 221.01 -14.08 Z M 229.77 0 L 234.48 0 L 235.66 -6.67 L 242.33 -6.67 L 241.14 0 L 245.83 0 L 248.16 -13.16 L 245.92 -15.4 L 231.37 -15.4 L 232.25 -14.08 Z M 236.1 -9.22 L 236.74 -12.85 L 243.41 -12.85 L 242.77 -9.22 Z M 253.55 -6.67 L 264.95 -6.67 L 264.22 -2.57 L 252.85 -2.57 L 252.38 0 L 268.44 0 L 269.68 -6.97 L 267.43 -9.22 L 258.7 -9.22 L 259.34 -12.83 L 264.04 -12.83 L 263.76 -11.18 L 268.47 -11.18 L 268.8 -13.16 L 266.55 -15.4 L 253.99 -15.4 L 254.87 -14.08 Z" stroke-linecap="round" />
+</g>
+</g>
+</g>
+</svg>

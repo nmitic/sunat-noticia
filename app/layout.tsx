@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SchedulerInitializer } from "@/components/SchedulerInitializer";
+import { Header } from "@/components/layout/Header";
 
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({
         className="bg-gray-50 dark:bg-gray-900 antialiased"
       >
         <SchedulerInitializer />
+        <Header />
         {children}
       </body>
     </html>
