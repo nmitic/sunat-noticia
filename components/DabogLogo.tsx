@@ -1,6 +1,6 @@
 export function DabogLogo() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -9 370 111.02528976456313" className="w-[130px]">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -9 370 111.02528976456313" className="w-32.5">
       <defs id="SvgjsDefs2789"></defs>
       <g
         id="SvgjsG2790"
