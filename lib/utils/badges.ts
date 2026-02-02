@@ -1,4 +1,4 @@
-import { NewsCategory, NewsFlag } from '@prisma/client';
+import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 
 /**
  * Check if a news item is "new" (published within the last hour)

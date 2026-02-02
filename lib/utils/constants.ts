@@ -1,4 +1,4 @@
-import { NewsCategory, NewsFlag } from '@prisma/client';
+import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 
 export const UI_TEXT = {
   categories: {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { NewsCategory, NewsFlag } from '@prisma/client';
+import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { NewsCard } from './NewsCard';
 import { FlagSelector } from './FlagSelector';
 import { UI_TEXT } from '@/lib/utils/constants';

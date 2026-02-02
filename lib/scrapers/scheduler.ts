@@ -3,7 +3,7 @@ import { BaseScraper, ScraperConfig } from './base';
 import { FacebookScraper } from './facebook';
 import { OficialScraper } from './oficial-placeholder';
 import { NoticiasScraper } from './noticias-placeholder';
-import { NewsCategory } from '@prisma/client';
+import { NewsCategory } from '@/lib/db/schema';
 
 /**
  * Global list of all scrapers

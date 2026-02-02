@@ -1,5 +1,5 @@
 import { BaseScraper, ScrapedNewsItem } from './base';
-import { NewsCategory } from '@prisma/client';
+import { NewsCategory } from '@/lib/db/schema';
 
 export class FacebookScraper extends BaseScraper {
   private readonly pageId = 'SUNAT';

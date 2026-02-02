@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/db/prisma';
+import { db, newsTable } from '@/lib/db/drizzle';
+import { eq } from 'drizzle-orm';
 
 // Global set to store active SSE connections
 // In production with multiple servers, this should use Redis
@@ -27,9 +28,10 @@ export function unregisterConnection(
  */
 export async function broadcastNewNews(newsId: string) {
   try {
-    const news = await prisma.news.findUnique({
-      where: { id: newsId },
-    });
+    const [news] = await db.select()
+      .from(newsTable)
+      .where(eq(newsTable.id, newsId))
+      .limit(1);
 
     if (!news || !news.published) {
       return;

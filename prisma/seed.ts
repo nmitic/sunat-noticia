@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import 'dotenv/config';
+import { db, adminTable } from '@/lib/db/drizzle';
 import { hash } from 'bcryptjs';
-
-const prisma = new PrismaClient();
+import { eq } from 'drizzle-orm';
 
 async function main() {
   // Get credentials from environment variables
@@ -14,26 +14,34 @@ async function main() {
   // Hash the password
   const passwordHash = await hash(password, 10);
 
-  // Create or update the admin user
-  const admin = await prisma.admin.upsert({
-    where: { email },
-    update: {},
-    create: {
-      email,
-      passwordHash,
-      name,
-    },
-  });
+  // Check if admin user already exists
+  const [existing] = await db.select()
+    .from(adminTable)
+    .where(eq(adminTable.email, email))
+    .limit(1);
 
-  console.log('Admin user created/updated:', admin);
+  if (existing) {
+    console.log('Admin user already exists:', existing);
+  } else {
+    // Create the admin user
+    const [admin] = await db.insert(adminTable)
+      .values({
+        email,
+        passwordHash,
+        name,
+      })
+      .returning();
+
+    console.log('Admin user created:', admin);
+  }
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
+  .then(() => {
+    console.log('Seeding completed');
+    process.exit(0);
   })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error('Error during seeding:', e);
-    await prisma.$disconnect();
     process.exit(1);
   });

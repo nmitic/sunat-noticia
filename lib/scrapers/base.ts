@@ -1,5 +1,6 @@
-import { NewsCategory } from '@prisma/client';
-import { prisma } from '@/lib/db/prisma';
+import { NewsCategory } from '@/lib/db/schema';
+import { db, newsTable, scraperRunTable } from '@/lib/db/drizzle';
+import { eq, and } from 'drizzle-orm';
 
 export interface ScrapedNewsItem {
   title: string;
@@ -78,17 +79,18 @@ export abstract class BaseScraper {
   private async saveToDatabase(items: ScrapedNewsItem[]): Promise<void> {
     for (const item of items) {
       // Check if item already exists (by title + source + date)
-      const existing = await prisma.news.findFirst({
-        where: {
-          title: item.title,
-          source: item.source,
-          originalDate: item.originalDate,
-        },
-      });
+      const [existing] = await db.select()
+        .from(newsTable)
+        .where(and(
+          eq(newsTable.title, item.title),
+          eq(newsTable.source, item.source),
+          eq(newsTable.originalDate, item.originalDate)
+        ))
+        .limit(1);
 
       if (!existing) {
-        await prisma.news.create({
-          data: {
+        await db.insert(newsTable)
+          .values({
             title: item.title,
             content: item.content,
             source: item.source,
@@ -97,8 +99,7 @@ export abstract class BaseScraper {
             originalDate: item.originalDate,
             published: false,
             flags: [],
-          },
-        });
+          });
       }
     }
   }
@@ -107,13 +108,13 @@ export abstract class BaseScraper {
    * Log scraper run start
    */
   private async logStart(): Promise<string> {
-    const run = await prisma.scraperRun.create({
-      data: {
+    const [run] = await db.insert(scraperRunTable)
+      .values({
         scraperName: this.config.name,
         status: 'IN_PROGRESS',
         startedAt: new Date(),
-      },
-    });
+      })
+      .returning();
     return run.id;
   }
 
@@ -121,27 +122,25 @@ export abstract class BaseScraper {
    * Log successful scraper run
    */
   private async logSuccess(runId: string, count: number): Promise<void> {
-    await prisma.scraperRun.update({
-      where: { id: runId },
-      data: {
+    await db.update(scraperRunTable)
+      .set({
         status: 'SUCCESS',
         itemsScraped: count,
         completedAt: new Date(),
-      },
-    });
+      })
+      .where(eq(scraperRunTable.id, runId));
   }
 
   /**
    * Log failed scraper run
    */
   private async logFailure(runId: string, error: string): Promise<void> {
-    await prisma.scraperRun.update({
-      where: { id: runId },
-      data: {
+    await db.update(scraperRunTable)
+      .set({
         status: 'FAILURE',
         errorMessage: error,
         completedAt: new Date(),
-      },
-    });
+      })
+      .where(eq(scraperRunTable.id, runId));
   }
 }

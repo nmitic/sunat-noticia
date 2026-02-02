@@ -1,7 +1,8 @@
-import { prisma } from '@/lib/db/prisma';
+import { db, newsTable } from '@/lib/db/drizzle';
 import { NewsFeed } from '@/components/news/NewsFeed';
 import { UI_TEXT } from '@/lib/utils/constants';
-import { NewsCategory, NewsFlag } from '@prisma/client';
+import { NewsCategory, NewsFlag } from '@/lib/db/schema';
+import { eq, desc } from 'drizzle-orm';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { EmailSubscriptionForm } from '@/components/layout/EmailSubscriptionForm';
@@ -123,21 +124,24 @@ export default async function HomePage() {
   let dbError = false;
 
   try {
-    news = await prisma.news.findMany({
-      where: { published: true },
-      orderBy: { originalDate: 'desc' },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        source: true,
-        sourceUrl: true,
-        category: true,
-        flags: true,
-        originalDate: true,
-        publishedAt: true,
-      },
-    });
+    const newsRows = await db.select({
+      id: newsTable.id,
+      title: newsTable.title,
+      content: newsTable.content,
+      source: newsTable.source,
+      sourceUrl: newsTable.sourceUrl,
+      category: newsTable.category,
+      flags: newsTable.flags,
+      originalDate: newsTable.originalDate,
+      publishedAt: newsTable.publishedAt,
+    }).from(newsTable)
+      .where(eq(newsTable.published, true))
+      .orderBy(desc(newsTable.originalDate));
+
+    news = newsRows.map(row => ({
+      ...row,
+      flags: (row.flags as NewsFlag[]) || [],
+    }));
   } catch (error) {
     console.error('Database error:', error);
     dbError = true;

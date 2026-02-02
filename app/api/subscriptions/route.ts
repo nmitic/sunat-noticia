@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@/lib/db/prisma';
+import { db, emailSubscriptionTable } from '@/lib/db/drizzle';
+import { eq } from 'drizzle-orm';
 
 const subscriptionSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -22,9 +23,10 @@ export async function POST(request: NextRequest) {
     const { email } = validation.data;
 
     // Check if email already exists
-    const existing = await prisma.emailSubscription.findUnique({
-      where: { email },
-    });
+    const [existing] = await db.select()
+      .from(emailSubscriptionTable)
+      .where(eq(emailSubscriptionTable.email, email))
+      .limit(1);
 
     if (existing) {
       if (existing.active) {
@@ -34,10 +36,9 @@ export async function POST(request: NextRequest) {
         );
       } else {
         // Reactivate if previously unsubscribed
-        await prisma.emailSubscription.update({
-          where: { email },
-          data: { active: true },
-        });
+        await db.update(emailSubscriptionTable)
+          .set({ active: true })
+          .where(eq(emailSubscriptionTable.email, email));
 
         return NextResponse.json(
           { message: 'Suscripción reactivada exitosamente' },
@@ -47,9 +48,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new subscription
-    const subscription = await prisma.emailSubscription.create({
-      data: { email, active: true },
-    });
+    const [subscription] = await db.insert(emailSubscriptionTable)
+      .values({ email, active: true })
+      .returning();
 
     return NextResponse.json(
       { message: 'Suscripción exitosa', data: subscription },

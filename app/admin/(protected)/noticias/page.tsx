@@ -1,6 +1,7 @@
-import { prisma } from '@/lib/db/prisma';
+import { db, newsTable } from '@/lib/db/drizzle';
 import { ReviewQueue } from '@/components/admin/ReviewQueue';
 import { UI_TEXT } from '@/lib/utils/constants';
+import { eq, desc } from 'drizzle-orm';
 
 export const metadata = {
   title: 'Noticias Pendientes - Panel Administrativo',
@@ -8,21 +9,24 @@ export const metadata = {
 
 export default async function AdminNoticiasPage() {
   // Fetch unpublished news
-  const news = await prisma.news.findMany({
-    where: { published: false },
-    orderBy: { scrapedAt: 'desc' },
-    select: {
-      id: true,
-      title: true,
-      content: true,
-      source: true,
-      sourceUrl: true,
-      category: true,
-      flags: true,
-      originalDate: true,
-      scrapedAt: true,
-    },
-  });
+  const newsRows = await db.select({
+    id: newsTable.id,
+    title: newsTable.title,
+    content: newsTable.content,
+    source: newsTable.source,
+    sourceUrl: newsTable.sourceUrl,
+    category: newsTable.category,
+    flags: newsTable.flags,
+    originalDate: newsTable.originalDate,
+    scrapedAt: newsTable.scrapedAt,
+  }).from(newsTable)
+    .where(eq(newsTable.published, false))
+    .orderBy(desc(newsTable.scrapedAt));
+
+  const news = newsRows.map(row => ({
+    ...row,
+    flags: (row.flags as any[]) || [],
+  }));
 
   return (
     <div className="space-y-6">

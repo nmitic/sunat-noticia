@@ -1,6 +1,6 @@
 'use client';
 
-import { NewsFlag } from '@prisma/client';
+import { NewsFlag } from '@/lib/db/schema';
 import { getFlagColorClasses } from '@/lib/utils/badges';
 import { UI_TEXT, getFlagLabel } from '@/lib/utils/constants';
 

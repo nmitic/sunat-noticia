@@ -1,4 +1,4 @@
-import { NewsCategory } from '@prisma/client';
+import { NewsCategory } from '@/lib/db/schema';
 import { getCategoryColorClasses } from '@/lib/utils/badges';
 import { getCategoryLabel } from '@/lib/utils/constants';
 import { formatDistanceToNow } from 'date-fns';

@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS 4
 - **Backend**: Node.js, Next.js API Routes
-- **Database**: PostgreSQL + Prisma ORM 6
+- **Database**: PostgreSQL + Drizzle ORM 0.44
 - **Authentication**: NextAuth.js 4 (Credentials provider)
 - **Real-time**: Server-Sent Events (SSE)
 - **Task Scheduling**: node-cron
@@ -23,10 +23,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`npm run build`** - Create optimized production build
 - **`npm run start`** - Start production server (requires `npm run build` first)
 - **`npm run lint`** - Run ESLint code quality checks
-- **`npm run db:push`** - Push Prisma migrations to database
+- **`npm run db:generate`** - Generate Drizzle migrations from schema
+- **`npm run db:migrate`** - Run Drizzle migrations
+- **`npm run db:push`** - Push Drizzle schema to database
 - **`npm run db:seed`** - Seed admin user from environment variables
-- **`npx prisma studio`** - Open Prisma Studio GUI (http://localhost:5555)
-- **`npx prisma migrate dev --name migration_name`** - Create new migration
+- **`npm run db:studio`** - Open Drizzle Studio GUI (http://localhost:5555)
 
 ## Complete Project Structure
 
@@ -74,7 +75,8 @@ sunat-noticias/
 │   ├── auth/
 │   │   └── config.ts                 # NextAuth configuration
 │   ├── db/
-│   │   └── prisma.ts                 # Prisma client singleton
+│   │   ├── schema.ts                 # Drizzle schema definitions
+│   │   └── drizzle.ts                # Drizzle client and connection pool
 │   ├── scrapers/
 │   │   ├── base.ts                   # BaseScraper abstract class
 │   │   ├── facebook.ts               # Facebook Graph API scraper (active)
@@ -87,8 +89,10 @@ sunat-noticias/
 │       ├── constants.ts              # Spanish UI text constants
 │       └── badges.ts                 # Badge/color utilities
 ├── prisma/
-│   ├── schema.prisma                 # Database schema (News, Admin, subscriptions, logs)
-│   └── seed.ts                       # Admin user seeding script
+│   └── seed.ts                       # Admin user seeding script (uses Drizzle)
+├── drizzle/
+│   └── *.sql                         # Generated Drizzle migrations
+├── drizzle.config.ts                 # Drizzle Kit configuration
 ├── types/
 │   └── (TypeScript types as needed)
 ├── .env.local                        # Environment configuration (secrets)
@@ -259,7 +263,9 @@ npx prisma studio
 
 | File | Purpose |
 |------|---------|
-| `prisma/schema.prisma` | Database models and relationships |
+| `lib/db/schema.ts` | Drizzle schema definitions (tables, enums) |
+| `lib/db/drizzle.ts` | Drizzle client and connection pool |
+| `drizzle.config.ts` | Drizzle Kit configuration |
 | `lib/auth/config.ts` | NextAuth configuration, admin authentication |
 | `lib/scrapers/base.ts` | Abstract scraper class, common patterns |
 | `lib/scrapers/facebook.ts` | Facebook data collection logic |

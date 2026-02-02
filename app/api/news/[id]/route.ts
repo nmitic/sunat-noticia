@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
-import { prisma } from '@/lib/db/prisma';
-import { NewsFlag } from '@prisma/client';
+import { db, newsTable } from '@/lib/db/drizzle';
+import { NewsFlag } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 import { broadcastNewNews } from '@/lib/sse/broadcast';
 
 export async function PATCH(
@@ -32,14 +33,14 @@ export async function PATCH(
     }
 
     // Update news item
-    const news = await prisma.news.update({
-      where: { id },
-      data: {
+    const [news] = await db.update(newsTable)
+      .set({
         published,
         flags: flags || [],
         publishedAt: published ? new Date() : null,
-      },
-    });
+      })
+      .where(eq(newsTable.id, id))
+      .returning();
 
     // Broadcast to SSE clients if published
     if (published) {
@@ -75,9 +76,8 @@ export async function DELETE(
     }
 
     // Hard delete the news item
-    await prisma.news.delete({
-      where: { id },
-    });
+    await db.delete(newsTable)
+      .where(eq(newsTable.id, id));
 
     return NextResponse.json(
       { message: 'News deleted successfully' },

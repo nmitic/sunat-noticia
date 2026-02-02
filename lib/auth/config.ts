@@ -1,7 +1,8 @@
 import type { NextAuthOptions, Session } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
-import { prisma } from '@/lib/db/prisma';
+import { db, adminTable } from '@/lib/db/drizzle';
+import { eq } from 'drizzle-orm';
 import { JWT } from 'next-auth/jwt';
 
 export const authOptions: NextAuthOptions = {
@@ -17,9 +18,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid credentials');
         }
 
-        const admin = await prisma.admin.findUnique({
-          where: { email: credentials.email },
-        });
+        const [admin] = await db.select()
+          .from(adminTable)
+          .where(eq(adminTable.email, credentials.email))
+          .limit(1);
 
         if (!admin) {
           throw new Error('No user found with this email');
