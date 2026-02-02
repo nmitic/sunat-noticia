@@ -3,7 +3,7 @@ import { DabogLogo } from "@/components/DabogLogo";
 export function Footer() {
   return (
     <footer className="border-t border-gray-200 bg-gray-50 dark:bg-gray-900">
-      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl px-4 pt-12 pb-24 sm:px-6 sm:py-12 lg:px-8">
         <div className="space-y-8">
           <div className="flex justify-center">
             <a href="http://dabog.pe/" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-80">
