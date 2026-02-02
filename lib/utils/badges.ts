@@ -15,13 +15,13 @@ export function isNew(publishedAt: Date | null): boolean {
  */
 export function getFlagColorClasses(flag: NewsFlag): string {
   const colors: Record<NewsFlag, string> = {
-    IMPORTANTE: 'bg-red-100 text-red-800 border border-red-300',
-    ACTUALIZACION: 'bg-blue-100 text-blue-800 border border-blue-300',
-    URGENTE: 'bg-orange-100 text-orange-800 border border-orange-300',
-    CAIDA_SISTEMA: 'bg-purple-100 text-purple-800 border border-purple-300',
+    IMPORTANTE: 'bg-red-100 text-red-800',
+    ACTUALIZACION: 'bg-blue-100 text-blue-800',
+    URGENTE: 'bg-orange-100 text-orange-800',
+    CAIDA_SISTEMA: 'bg-purple-100 text-purple-800',
   };
 
-  return colors[flag] || 'bg-gray-100 text-gray-800 border border-gray-300';
+  return colors[flag] || 'bg-gray-100 text-gray-800 border-gray-300';
 }
 
 /**

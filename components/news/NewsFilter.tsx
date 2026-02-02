@@ -70,7 +70,7 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
           {/* "Todas" link */}
           <button
             onClick={() => onFilterChange({ ...currentFilters, categories: [] })}
-            className={`flex items-center justify-center gap-2 text-sm font-medium transition-colors py-2 px-4 rounded-md ${currentFilters.categories.length === 0
+            className={`cursor-pointer flex items-center justify-center gap-2 text-sm font-medium transition-colors py-2 px-4 rounded-md ${currentFilters.categories.length === 0
               ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950'
               : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-blue-400'
               }`}
@@ -86,7 +86,7 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
               <button
                 key={category}
                 onClick={() => handleToggleCategory(category)}
-                className={`flex items-center justify-center gap-2 text-sm font-medium transition-colors py-2 px-4 rounded-md ${isActive
+                className={`cursor-pointer flex items-center justify-center gap-2 text-sm font-medium transition-colors py-2 px-4 rounded-md ${isActive
                   ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950'
                   : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-blue-400'
                   }`}
@@ -103,16 +103,28 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
 
       {/* Flags Section */}
       <div className="space-y-3">
-        <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-          {UI_TEXT.filters.flagsLabel}
+        <div className="py-3 flex justify-between mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <div>{UI_TEXT.filters.flagsLabel}</div>
+          {/* Clear Filters Button */}
+          {hasActiveFilters && (
+            <>
+              <button
+                onClick={handleClearFilters}
+                className="cursor-pointer w-full sm:w-auto underline"
+              >
+                {UI_TEXT.filters.clearFilters}
+              </button>
+            </>
+          )}
         </div>
         <div className="flex flex-wrap gap-3">
           {flags.map((flag) => (
-            <div key={flag} className="flex items-center space-x-2">
+            <div key={flag} className="flex items-center">
               <Checkbox
                 id={`flag-${flag}`}
                 checked={currentFilters.flags.includes(flag)}
                 onCheckedChange={() => handleToggleFlag(flag)}
+                className="sr-only"
               />
               <label
                 htmlFor={`flag-${flag}`}
@@ -127,19 +139,6 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
           ))}
         </div>
       </div>
-
-      {/* Clear Filters Button */}
-      {hasActiveFilters && (
-        <>
-          <Separator />
-          <Button
-            onClick={handleClearFilters}
-            className="w-full sm:w-auto bg-primary hover:brightness-110"
-          >
-            {UI_TEXT.filters.clearFilters}
-          </Button>
-        </>
-      )}
     </div>
   );
 }
