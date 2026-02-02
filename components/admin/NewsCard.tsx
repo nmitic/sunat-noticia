@@ -3,6 +3,8 @@ import { getCategoryColorClasses } from '@/lib/utils/badges';
 import { getCategoryLabel } from '@/lib/utils/constants';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Newspaper } from 'lucide-react';
+import Image from 'next/image';
 
 interface NewsCardProps {
   news: {
@@ -17,6 +19,17 @@ interface NewsCardProps {
   };
 }
 
+const getCategoryIcon = (category: NewsCategory) => {
+  switch (category) {
+    case 'OFICIAL':
+      return <Image src="/sunat.svg" alt="SUNAT" width={16} height={16} />;
+    case 'REDES_SOCIALES':
+      return <Image src="/facebook.svg" alt="Facebook" width={16} height={16} />;
+    case 'NOTICIAS':
+      return <Newspaper className="w-4 h-4" />;
+  }
+};
+
 export function NewsCard({ news }: NewsCardProps) {
   const dateStr = formatDistanceToNow(new Date(news.originalDate), {
     addSuffix: true,
@@ -30,7 +43,8 @@ export function NewsCard({ news }: NewsCardProps) {
           <h3 className="text-lg font-bold text-gray-900">{news.title}</h3>
           <p className="mt-1 text-sm text-gray-600">{news.source}</p>
         </div>
-        <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium ${getCategoryColorClasses(news.category)}`}>
+        <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium flex items-center gap-2 ${getCategoryColorClasses(news.category)}`}>
+          {getCategoryIcon(news.category)}
           {getCategoryLabel(news.category)}
         </span>
       </div>

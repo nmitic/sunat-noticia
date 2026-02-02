@@ -8,6 +8,8 @@ import { getCategoryColorClasses, getFlagColorClasses, isNew, getNuevoBadgeClass
 import { getCategoryLabel, getFlagLabel, UI_TEXT } from '@/lib/utils/constants';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Newspaper } from 'lucide-react';
+import Image from 'next/image';
 
 interface NewsCardProps {
   news: {
@@ -23,6 +25,17 @@ interface NewsCardProps {
   };
   showNewBadge?: boolean;
 }
+
+const getCategoryIcon = (category: NewsCategory) => {
+  switch (category) {
+    case 'OFICIAL':
+      return <Image src="/sunat.svg" alt="SUNAT" width={16} height={16} />;
+    case 'REDES_SOCIALES':
+      return <Image src="/facebook.svg" alt="Facebook" width={16} height={16} />;
+    case 'NOTICIAS':
+      return <Newspaper className="w-4 h-4" />;
+  }
+};
 
 export function NewsCard({ news, showNewBadge = false }: NewsCardProps) {
   const [isNewBadge, setIsNewBadge] = useState(
@@ -62,7 +75,8 @@ export function NewsCard({ news, showNewBadge = false }: NewsCardProps) {
             </CardTitle>
             <p className="text-sm text-gray-600">{news.source}</p>
           </div>
-          <Badge variant="outline" className={getCategoryColorClasses(news.category)}>
+          <Badge variant="outline" className={`flex items-center gap-2 ${getCategoryColorClasses(news.category)}`}>
+            {getCategoryIcon(news.category)}
             {getCategoryLabel(news.category)}
           </Badge>
         </div>

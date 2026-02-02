@@ -37,7 +37,7 @@ export const UI_TEXT = {
   filters: {
     allCategories: 'Todas',
     clearFilters: 'Limpiar filtros',
-    categoriesLabel: 'Categorías:',
+    sourcesLabel: 'Fuentes:',
     flagsLabel: 'Etiquetas:',
     noResults: 'No hay noticias que coincidan con los filtros seleccionados',
   },
