@@ -40,8 +40,8 @@ export function NewsCard({ news }: NewsCardProps) {
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-gray-900">{news.title}</h3>
-          <p className="mt-1 text-sm text-gray-600">{news.source}</p>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-50">{news.title}</h3>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{news.source}</p>
         </div>
         <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium flex items-center gap-2 ${getCategoryColorClasses(news.category)}`}>
           {getCategoryIcon(news.category)}
@@ -51,7 +51,7 @@ export function NewsCard({ news }: NewsCardProps) {
 
       <p className="line-clamp-3 text-sm text-gray-600 dark:text-gray-400">{news.content}</p>
 
-      <div className="flex items-center gap-4 text-xs text-gray-500">
+      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
         <span>{dateStr}</span>
         {news.sourceUrl && (
           <a

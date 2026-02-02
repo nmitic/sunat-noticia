@@ -89,13 +89,13 @@ export function ReviewQueue({ initialNews }: ReviewQueueProps) {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-red-800">
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-4 text-red-800 dark:text-red-200">
           <p className="text-sm font-medium">{error}</p>
         </div>
       )}
 
       {news.map((item) => (
-        <div key={item.id} className="rounded-lg border border-gray-200 bg-white p-6">
+        <div key={item.id} className="rounded-lg border border-border bg-card dark:bg-gray-800 p-6">
           <NewsCard news={item} />
 
           <div className="mt-4 space-y-4">
