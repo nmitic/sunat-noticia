@@ -49,7 +49,7 @@ export function NewsCard({ news }: NewsCardProps) {
         </span>
       </div>
 
-      <p className="line-clamp-3 text-sm text-gray-700">{news.content}</p>
+      <p className="line-clamp-3 text-sm text-gray-600 dark:text-gray-400">{news.content}</p>
 
       <div className="flex items-center gap-4 text-xs text-gray-500">
         <span>{dateStr}</span>

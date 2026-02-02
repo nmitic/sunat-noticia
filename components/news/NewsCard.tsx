@@ -83,7 +83,7 @@ export function NewsCard({ news, showNewBadge = false }: NewsCardProps) {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <p className="text-gray-700 line-clamp-3">{news.content}</p>
+        <p className="text-gray-600 dark:text-gray-400 line-clamp-3">{news.content}</p>
 
         {flags.length > 0 && (
           <div className="flex flex-wrap gap-2">

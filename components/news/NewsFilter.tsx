@@ -63,9 +63,9 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
     <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 space-y-4">
       {/* Sources Section */}
       <div className="space-y-3">
-        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           {UI_TEXT.filters.sourcesLabel}
-        </label>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {/* "Todas" link */}
           <button
@@ -103,10 +103,10 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
 
       {/* Flags Section */}
       <div className="space-y-3">
-        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           {UI_TEXT.filters.flagsLabel}
-        </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        </div>
+        <div className="flex flex-wrap gap-3">
           {flags.map((flag) => (
             <div key={flag} className="flex items-center space-x-2">
               <Checkbox
@@ -116,7 +116,10 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
               />
               <label
                 htmlFor={`flag-${flag}`}
-                className={`text-sm font-medium cursor-pointer px-2 py-1 rounded ${getFlagColorClasses(flag)}`}
+                className={`text-sm font-medium cursor-pointer px-2 py-1 rounded ${currentFilters.flags.includes(flag)
+                  ? getFlagColorClasses(flag)
+                  : 'text-gray-700 dark:text-gray-300'
+                  }`}
               >
                 {getFlagLabel(flag)}
               </label>
@@ -130,9 +133,8 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
         <>
           <Separator />
           <Button
-            variant="outline"
             onClick={handleClearFilters}
-            className="w-full sm:w-auto bg-primary hover:brightness-110 text-primary-foreground"
+            className="w-full sm:w-auto bg-primary hover:brightness-110"
           >
             {UI_TEXT.filters.clearFilters}
           </Button>
