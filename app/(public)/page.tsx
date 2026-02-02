@@ -4,6 +4,7 @@ import { UI_TEXT } from '@/lib/utils/constants';
 import { NewsCategory, NewsFlag } from '@prisma/client';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { EmailSubscriptionForm } from '@/components/layout/EmailSubscriptionForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -191,51 +192,9 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Sidebar subscribe form - desktop only */}
-          <div className="hidden lg:block lg:w-80">
-            <div className="sticky top-20 rounded-lg bg-gray-50 dark:bg-gray-800 p-6 border border-border shadow-sm">
-              <h3 className="text-lg font-semibold text-card-foreground mb-4">
-                {UI_TEXT.public.subscribe}
-              </h3>
-
-              <form className="space-y-3">
-                <input
-                  type="email"
-                  placeholder={UI_TEXT.public.emailPlaceholder}
-                  className="w-full rounded-lg border border-input bg-gray-50 dark:bg-gray-900 px-4 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-                <button
-                  type="button"
-                  className="w-full rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-                >
-                  {UI_TEXT.public.subscribeButton}
-                </button>
-              </form>
-            </div>
-          </div>
+          {/* Subscription form */}
+          <EmailSubscriptionForm />
         </div>
-
-        {/* Mobile sticky subscribe form */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-gray-50 dark:bg-gray-800 border-t border-border shadow-lg z-40">
-          <div className="mx-auto max-w-4xl px-4 py-3 sm:px-6">
-            <form className="flex gap-2">
-              <input
-                type="email"
-                placeholder={UI_TEXT.public.emailPlaceholder}
-                className="flex-1 min-w-0 rounded border border-input bg-gray-50 dark:bg-gray-900 px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-              <button
-                type="button"
-                className="whitespace-nowrap rounded bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                {UI_TEXT.public.subscribeButton}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* Add bottom padding on mobile to account for sticky form */}
-        <div className="lg:hidden h-20" />
       </div>
       <Footer />
     </>
