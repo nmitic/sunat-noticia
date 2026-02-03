@@ -11,6 +11,7 @@ export const UI_TEXT = {
     ACTUALIZACION: 'Actualización',
     URGENTE: 'Urgente',
     CAIDA_SISTEMA: 'Caída de Sistema',
+    SALA_PRENSA: 'Sala de Prensa',
   },
   admin: {
     login: 'Iniciar Sesión',

@@ -25,7 +25,15 @@ interface ReviewQueueProps {
 
 export function ReviewQueue({ initialNews, onNewsUpdated }: ReviewQueueProps) {
   const [news, setNews] = useState(initialNews);
-  const [selectedFlags, setSelectedFlags] = useState<Record<string, NewsFlag[]>>({});
+  const [selectedFlags, setSelectedFlags] = useState<Record<string, NewsFlag[]>>(() => {
+    const initial: Record<string, NewsFlag[]> = {};
+    for (const item of initialNews) {
+      if (item.flags.length > 0) {
+        initial[item.id] = item.flags;
+      }
+    }
+    return initial;
+  });
   const [loading, setLoading] = useState<string | null>(null);
   const [bulkLoading, setBulkLoading] = useState<'publish' | 'reject' | null>(null);
   const [error, setError] = useState<string | null>(null);

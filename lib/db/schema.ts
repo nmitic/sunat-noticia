@@ -22,6 +22,7 @@ export const newsFlagEnum = pgEnum('NewsFlag', [
   'ACTUALIZACION',
   'URGENTE',
   'CAIDA_SISTEMA',
+  'SALA_PRENSA',
 ]);
 
 // Export types for application use
@@ -30,7 +31,8 @@ export type NewsFlag =
   | 'IMPORTANTE'
   | 'ACTUALIZACION'
   | 'URGENTE'
-  | 'CAIDA_SISTEMA';
+  | 'CAIDA_SISTEMA'
+  | 'SALA_PRENSA';
 
 // News Table
 export const news = pgTable(

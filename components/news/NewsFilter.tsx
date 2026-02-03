@@ -32,7 +32,7 @@ const sourceIcons: Record<NewsCategory, React.ComponentType<{ className?: string
 
 export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) {
   const categories: NewsCategory[] = ['OFICIAL', 'REDES_SOCIALES', 'NOTICIAS'];
-  const flags: NewsFlag[] = ['IMPORTANTE', 'ACTUALIZACION', 'URGENTE', 'CAIDA_SISTEMA'];
+  const flags: NewsFlag[] = ['IMPORTANTE', 'ACTUALIZACION', 'URGENTE', 'CAIDA_SISTEMA', 'SALA_PRENSA'];
 
   const handleToggleCategory = (category: NewsCategory) => {
     const isActive = currentFilters.categories.includes(category);

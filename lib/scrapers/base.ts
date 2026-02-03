@@ -1,4 +1,4 @@
-import { NewsCategory } from '@/lib/db/schema';
+import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { db, newsTable, scraperRunTable } from '@/lib/db/drizzle';
 import { eq, and } from 'drizzle-orm';
 
@@ -9,6 +9,7 @@ export interface ScrapedNewsItem {
   sourceUrl?: string;
   category: NewsCategory;
   originalDate: Date;
+  flags?: NewsFlag[];
 }
 
 export interface ScraperConfig {
@@ -106,10 +107,16 @@ export abstract class BaseScraper {
             category: item.category,
             originalDate: item.originalDate,
             published: false,
-            flags: [],
+            flags: item.flags ?? [],
           });
         newCount++;
       } else {
+        // Update flags on existing items if the scraper provides default flags
+        if (item.flags?.length && existing.flags.length === 0) {
+          await db.update(newsTable)
+            .set({ flags: item.flags })
+            .where(eq(newsTable.id, existing.id));
+        }
         duplicateCount++;
       }
     }

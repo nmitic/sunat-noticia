@@ -4,7 +4,7 @@ import { NewsFlag } from '@/lib/db/schema';
 import { getFlagColorClasses } from '@/lib/utils/badges';
 import { UI_TEXT, getFlagLabel } from '@/lib/utils/constants';
 
-const FLAGS: NewsFlag[] = ['IMPORTANTE', 'ACTUALIZACION', 'URGENTE', 'CAIDA_SISTEMA'];
+const FLAGS: NewsFlag[] = ['IMPORTANTE', 'ACTUALIZACION', 'URGENTE', 'CAIDA_SISTEMA', 'SALA_PRENSA'];
 
 interface FlagSelectorProps {
   selected: NewsFlag[];

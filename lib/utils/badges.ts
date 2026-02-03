@@ -9,6 +9,7 @@ export function getFlagColorClasses(flag: NewsFlag): string {
     ACTUALIZACION: 'bg-blue-100 text-blue-800',
     URGENTE: 'bg-orange-100 text-orange-800',
     CAIDA_SISTEMA: 'bg-purple-100 text-purple-800',
+    SALA_PRENSA: 'bg-teal-100 text-teal-800',
   };
 
   return colors[flag] || 'bg-gray-100 text-gray-800 border-gray-300';

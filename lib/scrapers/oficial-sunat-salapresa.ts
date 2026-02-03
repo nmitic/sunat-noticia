@@ -125,6 +125,7 @@ export class OficialSunatSalaPresaScraper extends BaseScraper {
       sourceUrl,
       category: 'OFICIAL',
       originalDate,
+      flags: ['SALA_PRENSA'],
     };
   }
 
