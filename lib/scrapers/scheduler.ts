@@ -26,7 +26,7 @@ const scrapers: BaseScraper[] = [
   new OficialSunatSalaPresaScraper({
     name: 'oficial-sources-sala',
     category: 'OFICIAL' as NewsCategory,
-    enabled: false, // Disabled until implemented
+    enabled: true,
     cronSchedule: '0 */6 * * *', // Every 6 hours
   }),
   new OficialSunatInstitucionScraper({
