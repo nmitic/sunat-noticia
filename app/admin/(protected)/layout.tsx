@@ -22,24 +22,13 @@ export default async function ProtectedAdminLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <nav className="bg-gray-800 dark:bg-gray-900 text-white shadow-lg">
+      <nav className="dark:bg-gray-900 text-white shadow-lg">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/admin/noticias" className="text-xl font-bold text-white">
-                SUNAT Noticias Admin
-              </Link>
-              <nav className="hidden md:flex gap-6">
-                <Link
-                  href="/admin/noticias"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Noticias Pendientes
-                </Link>
-              </nav>
+              <span className="font-bold text-sm text-gray-600 dark:text-gray-300">{session.user?.name}</span>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-300">{session.user?.email}</span>
               <SignOutButton />
             </div>
           </div>
