@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { getCategoryColorClasses, getFlagColorClasses, isNew, getNuevoBadgeClasses } from '@/lib/utils/badges';
+import { getCategoryColorClasses, getFlagColorClasses } from '@/lib/utils/badges';
 import { getCategoryLabel, getFlagLabel, UI_TEXT } from '@/lib/utils/constants';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -23,7 +22,6 @@ interface NewsCardProps {
     originalDate: Date;
     publishedAt?: Date | null;
   };
-  showNewBadge?: boolean;
 }
 
 const getCategoryIcon = (category: NewsCategory) => {
@@ -37,21 +35,7 @@ const getCategoryIcon = (category: NewsCategory) => {
   }
 };
 
-export function NewsCard({ news, showNewBadge = false }: NewsCardProps) {
-  const [isNewBadge, setIsNewBadge] = useState(
-    showNewBadge ? isNew(news.publishedAt || null) : false
-  );
-
-  // Re-check isNew status every minute to auto-remove badge
-  useEffect(() => {
-    if (!showNewBadge) return;
-
-    const interval = setInterval(() => {
-      setIsNewBadge(isNew(news.publishedAt || null));
-    }, 60000); // Check every 60 seconds
-
-    return () => clearInterval(interval);
-  }, [showNewBadge, news.publishedAt]);
+export function NewsCard({ news }: NewsCardProps) {
 
   const dateStr = formatDistanceToNow(new Date(news.originalDate), {
     addSuffix: true,
@@ -65,13 +49,8 @@ export function NewsCard({ news, showNewBadge = false }: NewsCardProps) {
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2">
-            <CardTitle className="flex items-center gap-2 flex-wrap text-xl">
+            <CardTitle className="text-xl">
               {news.title}
-              {isNewBadge && (
-                <Badge variant="outline" className={getNuevoBadgeClasses()}>
-                  {UI_TEXT.badges.NUEVO}
-                </Badge>
-              )}
             </CardTitle>
             <p className="text-sm text-gray-600">{news.source}</p>
           </div>

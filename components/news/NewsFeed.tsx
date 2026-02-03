@@ -49,7 +49,7 @@ export function NewsFeed({ initialNews, showFilters = true }: NewsFeedProps) {
       <div className={`space-y-4 ${showFilters ? 'mt-6' : ''}`}>
         {filteredNews.length > 0 ? (
           filteredNews.map((item) => (
-            <NewsCard key={item.id} news={item} showNewBadge={true} />
+            <NewsCard key={item.id} news={item} />
           ))
         ) : (
           <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-8 text-center">

@@ -1,16 +1,6 @@
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 
 /**
- * Check if a news item is "new" (published within the last hour)
- */
-export function isNew(publishedAt: Date | null): boolean {
-  if (!publishedAt) return false;
-
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-  return publishedAt > oneHourAgo;
-}
-
-/**
  * Get Tailwind color classes for a flag
  */
 export function getFlagColorClasses(flag: NewsFlag): string {
@@ -35,11 +25,4 @@ export function getCategoryColorClasses(category: NewsCategory): string {
   };
 
   return colors[category] || 'bg-gray-100 text-gray-800 border border-gray-300';
-}
-
-/**
- * Get Tailwind color classes for the "Nuevo" badge
- */
-export function getNuevoBadgeClasses(): string {
-  return 'bg-green-100 text-green-800 border border-green-300 animate-pulse';
 }

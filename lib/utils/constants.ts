@@ -12,9 +12,6 @@ export const UI_TEXT = {
     URGENTE: 'Urgente',
     CAIDA_SISTEMA: 'Caída de Sistema',
   },
-  badges: {
-    NUEVO: 'Nuevo',
-  },
   admin: {
     login: 'Iniciar Sesión',
     logout: 'Cerrar Sesión',
