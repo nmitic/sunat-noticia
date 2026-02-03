@@ -27,6 +27,7 @@ export function ReviewQueue({ initialNews, onNewsUpdated }: ReviewQueueProps) {
   const [news, setNews] = useState(initialNews);
   const [selectedFlags, setSelectedFlags] = useState<Record<string, NewsFlag[]>>({});
   const [loading, setLoading] = useState<string | null>(null);
+  const [bulkLoading, setBulkLoading] = useState<'publish' | 'reject' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handlePublish(newsId: string) {
@@ -93,11 +94,86 @@ export function ReviewQueue({ initialNews, onNewsUpdated }: ReviewQueueProps) {
     }
   }
 
+  async function handlePublishAll() {
+    setBulkLoading('publish');
+    setError(null);
+
+    try {
+      const newsIds = news.map((n) => n.id);
+
+      const response = await fetch('/api/news/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newsIds, flags: selectedFlags }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al publicar las noticias');
+      }
+
+      // Clear all items and refresh
+      setNews([]);
+      setSelectedFlags({});
+      onNewsUpdated?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setBulkLoading(null);
+    }
+  }
+
+  async function handleRejectAll() {
+    setBulkLoading('reject');
+    setError(null);
+
+    try {
+      const newsIds = news.map((n) => n.id);
+
+      const response = await fetch('/api/news/batch', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newsIds }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al rechazar las noticias');
+      }
+
+      // Clear all items and refresh
+      setNews([]);
+      setSelectedFlags({});
+      onNewsUpdated?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setBulkLoading(null);
+    }
+  }
+
   return (
     <div className="space-y-4">
       {error && (
         <div className="rounded-lg bg-red-50 dark:bg-red-950 p-4 text-red-800 dark:text-red-200">
           <p className="text-sm font-medium">{error}</p>
+        </div>
+      )}
+
+      {news.length > 0 && (
+        <div className="flex gap-2">
+          <button
+            onClick={handlePublishAll}
+            disabled={bulkLoading !== null || loading !== null}
+            className="rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          >
+            {bulkLoading === 'publish' ? 'Publicando todas...' : 'Publicar todas'}
+          </button>
+          <button
+            onClick={handleRejectAll}
+            disabled={bulkLoading !== null || loading !== null}
+            className="rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          >
+            {bulkLoading === 'reject' ? 'Rechazando todas...' : 'Rechazar todas'}
+          </button>
         </div>
       )}
 
