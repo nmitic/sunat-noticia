@@ -1,4 +1,5 @@
 import { BaseScraper, ScrapedNewsItem } from './base';
+import { decodeContent } from '@/lib/utils/decode-content';
 
 /**
  * Placeholder scraper for official SUNAT sources
@@ -23,7 +24,8 @@ export class OficialScraper extends BaseScraper {
   }
 
   /**
-   * Fetch HTML from SUNAT website
+   * Fetch HTML from SUNAT website with proper encoding handling
+   * SUNAT serves ISO-8859-1 encoded content, not UTF-8
    */
   private async fetchPageHtml(): Promise<string> {
     const response = await fetch(this.baseUrl, {
@@ -38,7 +40,50 @@ export class OficialScraper extends BaseScraper {
       );
     }
 
-    return response.text();
+    // Check Content-Type header for charset
+    const contentType = response.headers.get('content-type') || '';
+    console.log(`Content-Type: ${contentType}`);
+
+    // Get raw buffer to handle encoding properly
+    const buffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+
+    // Detect charset from HTML meta tag or Content-Type
+    let charset = 'iso-8859-1'; // Default for SUNAT
+
+    // Check for charset in Content-Type header
+    const headerCharset = contentType.match(/charset=([^\s;]+)/i)?.[1];
+    if (headerCharset) {
+      charset = headerCharset.replace(/['"]/g, '').trim().toLowerCase();
+    }
+
+    console.log(`Detected charset: ${charset}`);
+
+    // Convert bytes to string based on detected encoding
+    if (charset === 'utf-8' || charset === 'utf8') {
+      // UTF-8: use standard decoder
+      return new TextDecoder('utf-8').decode(bytes);
+    } else if (charset === 'iso-8859-1' || charset === 'latin1' || charset === 'windows-1252') {
+      // ISO-8859-1 / Latin-1: each byte maps directly to Unicode code point
+      let result = '';
+      for (let i = 0; i < bytes.length; i++) {
+        result += String.fromCharCode(bytes[i]);
+      }
+      return result;
+    } else {
+      // Fallback: try TextDecoder with detected charset
+      try {
+        return new TextDecoder(charset).decode(bytes);
+      } catch (error) {
+        console.warn(`Charset ${charset} not supported, using ISO-8859-1 fallback`);
+        // Fallback to ISO-8859-1
+        let result = '';
+        for (let i = 0; i < bytes.length; i++) {
+          result += String.fromCharCode(bytes[i]);
+        }
+        return result;
+      }
+    }
   }
 
   /**
@@ -131,18 +176,14 @@ export class OficialScraper extends BaseScraper {
   }
 
   /**
-   * Strip HTML tags from string efficiently
+   * Strip HTML tags and decode entities
    */
   private stripHtmlTags(html: string): string {
-    return html
-      .replace(/<[^>]+>/g, '') // Remove all HTML tags
-      .replace(/&nbsp;/g, ' ') // Convert HTML entities
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\s+/g, ' ') // Collapse multiple spaces
-      .trim();
+    // First decode HTML entities
+    let content = decodeContent(html);
+    // Then remove HTML tags
+    content = content.replace(/<[^>]+>/g, '');
+    // Collapse multiple spaces and trim
+    return content.replace(/\s+/g, ' ').trim();
   }
 }
