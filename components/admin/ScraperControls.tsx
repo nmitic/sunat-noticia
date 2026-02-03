@@ -11,7 +11,12 @@ const SCRAPERS = [
   { name: 'news-outlets', label: 'Outlets de Noticias' },
 ];
 
-export function ScraperControls() {
+interface ScraperControlsProps {
+  onScraperComplete?: () => void;
+  isRefetching?: boolean;
+}
+
+export function ScraperControls({ onScraperComplete, isRefetching }: ScraperControlsProps) {
   const [selected, setSelected] = useState('facebook-sunat');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +49,7 @@ export function ScraperControls() {
         setSuccess(
           `Completado: ${totalNew} noticias nuevas, ${totalDuplicates} duplicadas`
         );
+        onScraperComplete?.();
       } else {
         const response = await fetch('/api/scheduler/run', {
           method: 'POST',
@@ -60,6 +66,7 @@ export function ScraperControls() {
         setSuccess(
           `${result.newCount || 0} noticias nuevas, ${result.duplicateCount || 0} duplicadas`
         );
+        onScraperComplete?.();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -90,7 +97,7 @@ export function ScraperControls() {
         <Select
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
-          disabled={loading}
+          disabled={loading || isRefetching}
           className="flex-1"
         >
           {SCRAPERS.map((scraper) => (
@@ -101,9 +108,9 @@ export function ScraperControls() {
         </Select>
         <Button
           onClick={() => runScraper(selected)}
-          disabled={loading}
+          disabled={loading || isRefetching}
         >
-          {loading ? 'Ejecutando...' : 'Ejecutar'}
+          {loading ? 'Ejecutando...' : isRefetching ? 'Cargando...' : 'Ejecutar'}
         </Button>
       </div>
     </div>

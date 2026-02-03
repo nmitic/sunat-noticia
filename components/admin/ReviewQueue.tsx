@@ -20,6 +20,7 @@ interface NewsItem {
 
 interface ReviewQueueProps {
   initialNews: NewsItem[];
+  onNewsUpdated?: () => void;
 }
 
 export function ReviewQueue({ initialNews }: ReviewQueueProps) {
