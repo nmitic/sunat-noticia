@@ -23,7 +23,7 @@ interface ReviewQueueProps {
   onNewsUpdated?: () => void;
 }
 
-export function ReviewQueue({ initialNews }: ReviewQueueProps) {
+export function ReviewQueue({ initialNews, onNewsUpdated }: ReviewQueueProps) {
   const [news, setNews] = useState(initialNews);
   const [selectedFlags, setSelectedFlags] = useState<Record<string, NewsFlag[]>>({});
   const [loading, setLoading] = useState<string | null>(null);
@@ -53,6 +53,9 @@ export function ReviewQueue({ initialNews }: ReviewQueueProps) {
         delete newFlags[newsId];
         return newFlags;
       });
+
+      // Trigger parent update
+      onNewsUpdated?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
@@ -80,6 +83,9 @@ export function ReviewQueue({ initialNews }: ReviewQueueProps) {
         delete newFlags[newsId];
         return newFlags;
       });
+
+      // Trigger parent update
+      onNewsUpdated?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
