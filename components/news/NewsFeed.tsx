@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { NewsCard } from './NewsCard';
 import { NewsFilter, FilterState } from './NewsFilter';
@@ -29,47 +29,13 @@ export function NewsFeed({ initialNews, showFilters = true }: NewsFeedProps) {
     categories: [],
     flags: [],
   });
-  const [allNews, setAllNews] = useState<NewsItem[]>(initialNews);
+  const [allNews] = useState<NewsItem[]>(initialNews);
 
   // Computed filtered news based on current filter state
   const filteredNews = useMemo(
     () => filterNews(allNews, filterState),
     [allNews, filterState]
   );
-
-  useEffect(() => {
-    // Connect to SSE stream
-    const eventSource = new EventSource('/api/sse');
-
-    eventSource.addEventListener('message', (event) => {
-      try {
-        const data = JSON.parse(event.data);
-
-        if (data.type === 'new-news') {
-          // Add new news to the top of allNews
-          setAllNews((prevNews) => {
-            // Avoid duplicates
-            if (prevNews.some((n) => n.id === data.data.id)) {
-              return prevNews;
-            }
-
-            return [data.data, ...prevNews];
-          });
-        }
-      } catch (error) {
-        console.error('Error parsing SSE data:', error);
-      }
-    });
-
-    eventSource.addEventListener('error', () => {
-      console.error('SSE connection error');
-      eventSource.close();
-    });
-
-    return () => {
-      eventSource.close();
-    };
-  }, []);
 
   return (
     <div className="space-y-4">

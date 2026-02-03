@@ -4,7 +4,6 @@ import { authOptions } from '@/lib/auth/config';
 import { db, newsTable } from '@/lib/db/drizzle';
 import { NewsFlag } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { broadcastNewNews } from '@/lib/sse/broadcast';
 
 export async function PATCH(
   request: NextRequest,
@@ -41,11 +40,6 @@ export async function PATCH(
       })
       .where(eq(newsTable.id, id))
       .returning();
-
-    // Broadcast to SSE clients if published
-    if (published) {
-      await broadcastNewNews(id);
-    }
 
     return NextResponse.json(news, { status: 200 });
   } catch (error) {
