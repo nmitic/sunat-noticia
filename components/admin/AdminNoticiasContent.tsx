@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { ReviewQueue } from './ReviewQueue';
 import { ScraperControls } from './ScraperControls';
+import { ScraperRunsLog } from './ScraperRunsLog';
 import { UI_TEXT } from '@/lib/utils/constants';
 
 interface NewsItem {
@@ -68,6 +69,7 @@ export function AdminNoticiasContent({ initialNews }: AdminNoticiasContentProps)
       {/* Sidebar */}
       <div className="w-full lg:w-80 shrink-0">
         <ScraperControls onScraperComplete={refetchNews} isRefetching={isRefetching} />
+        <ScraperRunsLog />
       </div>
     </div>
   );
