@@ -47,36 +47,44 @@ export abstract class BaseScraper {
   /**
    * Execute the scraper with error handling and logging
    */
-  async execute(): Promise<{ success: boolean; count: number; error?: string }> {
+  async execute(): Promise<{ success: boolean; count: number; newCount: number; duplicateCount: number; error?: string }> {
     const runId = await this.logStart();
 
     try {
       await this.beforeScrape();
       const items = await this.scrape();
 
+      let newCount = 0;
+      let duplicateCount = 0;
+
       if (items.length > 0) {
-        await this.saveToDatabase(items);
+        const result = await this.saveToDatabase(items);
+        newCount = result.newCount;
+        duplicateCount = result.duplicateCount;
       }
 
       await this.afterScrape(items);
       await this.logSuccess(runId, items.length);
 
       console.log(
-        `[${this.config.name}] Successfully scraped ${items.length} items`
+        `[${this.config.name}] Successfully scraped ${items.length} items (${newCount} new, ${duplicateCount} duplicates)`
       );
-      return { success: true, count: items.length };
+      return { success: true, count: items.length, newCount, duplicateCount };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       await this.logFailure(runId, errorMsg);
       console.error(`[${this.config.name}] Error during scraping:`, errorMsg);
-      return { success: false, count: 0, error: errorMsg };
+      return { success: false, count: 0, newCount: 0, duplicateCount: 0, error: errorMsg };
     }
   }
 
   /**
    * Save items to database with deduplication
    */
-  private async saveToDatabase(items: ScrapedNewsItem[]): Promise<void> {
+  private async saveToDatabase(items: ScrapedNewsItem[]): Promise<{ newCount: number; duplicateCount: number }> {
+    let newCount = 0;
+    let duplicateCount = 0;
+
     for (const item of items) {
       // Check if item already exists (by title + source + date)
       const [existing] = await db.select()
@@ -100,8 +108,13 @@ export abstract class BaseScraper {
             published: false,
             flags: [],
           });
+        newCount++;
+      } else {
+        duplicateCount++;
       }
     }
+
+    return { newCount, duplicateCount };
   }
 
   /**
