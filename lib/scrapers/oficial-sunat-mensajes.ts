@@ -2,18 +2,12 @@ import { BaseScraper, ScrapedNewsItem } from './base';
 import { decodeContent } from '@/lib/utils/decode-content';
 
 /**
- * Placeholder scraper for official SUNAT sources
+ * Scraper for official SUNAT mensajes (messages)
+ * Source: https://www.sunat.gob.pe/mensajes/mensajes-SUNAT.html
  *
- * TODO: Implement scraping for:
- * - https://www.sunat.gob.pe/mensajes/mensajes-SUNAT.html
- * - https://www.gob.pe/institucion/sunat/noticias
- * - https://www.sunat.gob.pe/salaprensa/lima/index.html
- *
- * Recommended libraries:
- * - cheerio: HTML parsing
- * - puppeteer: JavaScript-heavy sites
+ * Scrapes SUNAT official messages/announcements from the mensajes page.
  */
-export class OficialScraper extends BaseScraper {
+export class OficialSunatMensajesScraper extends BaseScraper {
   private readonly baseUrl = 'https://www.sunat.gob.pe/mensajes/mensajes-SUNAT.html';
   private readonly baseDir = 'https://www.sunat.gob.pe/mensajes/';
   private readonly source = 'SUNAT mensajes';

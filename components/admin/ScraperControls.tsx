@@ -7,7 +7,9 @@ import { Select } from '@/components/ui/select';
 const SCRAPERS = [
   { name: 'all', label: 'Todos' },
   { name: 'facebook-sunat', label: 'Social Media (Facebook)' },
-  { name: 'oficial-sources', label: 'Oficial SUNAT' },
+  { name: 'oficial-sources-mensaje', label: 'Oficial Mensajes' },
+  { name: 'oficial-sources-sala', label: 'Oficial Salapresa' },
+  { name: 'oficial-sources-institucion', label: 'Oficial Institucion' },
   { name: 'news-outlets', label: 'Outlets de Noticias' },
 ];
 

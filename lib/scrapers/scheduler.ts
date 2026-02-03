@@ -1,7 +1,9 @@
 import * as cron from 'node-cron';
 import { BaseScraper, ScraperConfig } from './base';
 import { FacebookScraper } from './facebook';
-import { OficialScraper } from './oficial-placeholder';
+import { OficialSunatMensajesScraper } from './oficial-sunat-mensajes';
+import { OficialSunatSalaPresaScraper } from './oficial-sunat-salapresa';
+import { OficialSunatInstitucionScraper } from './oficial-sunat-institucion';
 import { NoticiasScraper } from './noticias-placeholder';
 import { NewsCategory } from '@/lib/db/schema';
 
@@ -15,8 +17,20 @@ const scrapers: BaseScraper[] = [
     enabled: true,
     cronSchedule: '0 */2 * * *', // Every 2 hours
   }),
-  new OficialScraper({
-    name: 'oficial-sources',
+  new OficialSunatMensajesScraper({
+    name: 'oficial-sources-mensaje',
+    category: 'OFICIAL' as NewsCategory,
+    enabled: true,
+    cronSchedule: '0 */6 * * *', // Every 6 hours
+  }),
+  new OficialSunatSalaPresaScraper({
+    name: 'oficial-sources-sala',
+    category: 'OFICIAL' as NewsCategory,
+    enabled: false, // Disabled until implemented
+    cronSchedule: '0 */6 * * *', // Every 6 hours
+  }),
+  new OficialSunatInstitucionScraper({
+    name: 'oficial-sources-institucion',
     category: 'OFICIAL' as NewsCategory,
     enabled: false, // Disabled until implemented
     cronSchedule: '0 */6 * * *', // Every 6 hours
