@@ -124,7 +124,7 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
                 id={`flag-${flag}`}
                 checked={currentFilters.flags.includes(flag)}
                 onCheckedChange={() => handleToggleFlag(flag)}
-                className="sr-only"
+                className="sr-only hidden"
               />
               <label
                 htmlFor={`flag-${flag}`}
