@@ -60,17 +60,17 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
   const hasActiveFilters = currentFilters.categories.length > 0 || currentFilters.flags.length > 0;
 
   return (
-    <div className=" sticky top-0 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 space-y-4">
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 sm:p-6 space-y-2 sm:space-y-4">
       {/* Sources Section */}
-      <div className="space-y-3">
-        <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <div className="space-y-2 sm:space-y-3">
+        <div className="mb-2 sm:mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           {UI_TEXT.filters.sourcesLabel}
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="flex overflow-x-auto sm:grid sm:grid-cols-4 gap-1.5 sm:gap-2 pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
           {/* "Todas" link */}
           <button
             onClick={() => onFilterChange({ ...currentFilters, categories: [] })}
-            className={`cursor-pointer flex items-center justify-center gap-2 text-sm font-medium transition-colors py-2 px-4 rounded-md ${currentFilters.categories.length === 0
+            className={`cursor-pointer flex items-center justify-center gap-2 text-sm font-medium transition-colors py-1.5 sm:py-2 px-3 sm:px-4 rounded-md whitespace-nowrap shrink-0 ${currentFilters.categories.length === 0
               ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950'
               : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-blue-400'
               }`}
@@ -86,7 +86,7 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
               <button
                 key={category}
                 onClick={() => handleToggleCategory(category)}
-                className={`cursor-pointer flex items-center justify-center gap-2 text-sm font-medium transition-colors py-2 px-4 rounded-md ${isActive
+                className={`cursor-pointer flex items-center justify-center gap-2 text-sm font-medium transition-colors py-1.5 sm:py-2 px-3 sm:px-4 rounded-md whitespace-nowrap shrink-0 ${isActive
                   ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950'
                   : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-blue-400'
                   }`}
@@ -102,8 +102,8 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
       <Separator />
 
       {/* Flags Section */}
-      <div className="space-y-3">
-        <div className="py-3 flex justify-between mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <div className="space-y-2 sm:space-y-3">
+        <div className="py-2 sm:py-3 flex justify-between mb-2 sm:mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           <div>{UI_TEXT.filters.flagsLabel}</div>
           {/* Clear Filters Button */}
           {hasActiveFilters && (
@@ -117,9 +117,9 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
             </>
           )}
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex overflow-x-auto sm:flex-wrap gap-2 sm:gap-3 pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
           {flags.map((flag) => (
-            <div key={flag} className="flex items-center">
+            <div key={flag} className="flex items-center shrink-0">
               <Checkbox
                 id={`flag-${flag}`}
                 checked={currentFilters.flags.includes(flag)}
@@ -128,7 +128,7 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
               />
               <label
                 htmlFor={`flag-${flag}`}
-                className={`text-sm font-medium cursor-pointer px-2 py-1 rounded ${currentFilters.flags.includes(flag)
+                className={`text-sm font-medium cursor-pointer px-2 py-0.5 sm:py-1 rounded whitespace-nowrap ${currentFilters.flags.includes(flag)
                   ? getFlagColorClasses(flag)
                   : 'text-gray-700 dark:text-gray-300'
                   }`}
