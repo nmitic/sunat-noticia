@@ -1,18 +1,42 @@
 import { NextResponse } from 'next/server';
 import { db, newsTable } from '@/lib/db/drizzle';
-import { eq, desc, and, lt } from 'drizzle-orm';
-import { NewsFlag } from '@/lib/db/schema';
+import { eq, desc, and, lt, or, sql } from 'drizzle-orm';
+import { NewsFlag, NewsCategory } from '@/lib/db/schema';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const cursor = searchParams.get('cursor');
   const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
 
+  // Get filter parameters
+  const categoryParam = searchParams.get('category');
+  const flagsParam = searchParams.get('flags'); // Comma-separated string
+
   try {
-    // Build query with optional cursor
+    // Build query with optional cursor and filters
     const conditions = [eq(newsTable.published, true)];
+
+    // Add cursor condition
     if (cursor) {
       conditions.push(lt(newsTable.originalDate, new Date(cursor)));
+    }
+
+    // Add category filter (single category)
+    if (categoryParam) {
+      const category = categoryParam as NewsCategory;
+      conditions.push(eq(newsTable.category, category));
+    }
+
+    // Add flags filter (array of flags - item must have at least one)
+    if (flagsParam) {
+      const flags = flagsParam.split(',') as NewsFlag[];
+      if (flags.length > 0) {
+        // Use PostgreSQL array overlap operator: flags && ARRAY['flag1', 'flag2']
+        const flagConditions = flags.map(flag =>
+          sql`${newsTable.flags} @> ARRAY[${flag}]::text[]`
+        );
+        conditions.push(or(...flagConditions)!);
+      }
     }
 
     // Fetch limit + 1 to check if more items exist

@@ -61,12 +61,8 @@ export default async function EmbeddedPage() {
             Ocurrió un error al cargar las noticias. Por favor, inténtalo más tarde.
           </p>
         </div>
-      ) : news.length > 0 ? (
-        <NewsFeed initialNews={news} showFilters={false} />
       ) : (
-        <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-8 text-center">
-          <p className="text-gray-600 dark:text-gray-400">{UI_TEXT.public.noNews}</p>
-        </div>
+        <NewsFeed initialNews={news} showFilters={false} />
       )}
     </>
   );

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { NewsCard } from './NewsCard';
 import { NewsFilter, FilterState } from './NewsFilter';
-import { filterNews } from '@/lib/utils/filters';
 import { UI_TEXT } from '@/lib/utils/constants';
 
 interface NewsItem {
@@ -25,10 +25,22 @@ interface NewsFeedProps {
 }
 
 export function NewsFeed({ initialNews, showFilters = true }: NewsFeedProps) {
-  const [filterState, setFilterState] = useState<FilterState>({
-    categories: [],
-    flags: [],
-  });
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Initialize filters from URL params
+  const getInitialFilters = (): FilterState => {
+    const categoryParam = searchParams.get('category');
+    const flagsParam = searchParams.get('flags');
+
+    return {
+      categories: categoryParam ? [categoryParam as NewsCategory] : [],
+      flags: flagsParam ? (flagsParam.split(',') as NewsFlag[]) : [],
+    };
+  };
+
+  const [filterState, setFilterState] = useState<FilterState>(getInitialFilters());
   const [allNews, setAllNews] = useState<NewsItem[]>(initialNews);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialNews.length >= 50);
@@ -38,33 +50,106 @@ export function NewsFeed({ initialNews, showFilters = true }: NewsFeedProps) {
       : null
   );
   const observerTarget = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
 
-  // Computed filtered news based on current filter state
-  const filteredNews = useMemo(
-    () => filterNews(allNews, filterState),
-    [allNews, filterState]
-  );
+  // Build URL with filter parameters
+  const buildApiUrl = (cursorValue: string | null) => {
+    const params = new URLSearchParams();
+    params.set('limit', '50');
 
-  // Fetch more news from API
-  const fetchMoreNews = async () => {
-    if (loading || !hasMore || !cursor) return;
+    if (cursorValue) {
+      params.set('cursor', cursorValue);
+    }
+
+    // Add category filter (single category, use first selected)
+    if (filterState.categories.length > 0) {
+      params.set('category', filterState.categories[0]);
+    }
+
+    // Add flags filter (comma-separated)
+    if (filterState.flags.length > 0) {
+      params.set('flags', filterState.flags.join(','));
+    }
+
+    return `/api/news?${params.toString()}`;
+  };
+
+  // Fetch news from API (used for both initial filter and load more)
+  const fetchNews = async (cursorValue: string | null, append: boolean = true) => {
+    if (loading) return;
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/news?cursor=${cursor}&limit=50`);
+      const res = await fetch(buildApiUrl(cursorValue));
       if (!res.ok) throw new Error('Failed to fetch news');
 
       const data = await res.json();
 
-      setAllNews(prev => [...prev, ...data.news]);
+      if (append) {
+        setAllNews(prev => [...prev, ...data.news]);
+      } else {
+        setAllNews(data.news);
+      }
       setHasMore(data.hasMore);
       setCursor(data.nextCursor);
     } catch (error) {
-      console.error('Error loading more news:', error);
+      console.error('Error loading news:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Fetch more news from API (for infinite scroll)
+  const fetchMoreNews = async () => {
+    if (!hasMore || !cursor) return;
+    await fetchNews(cursor, true);
+  };
+
+  // Update URL when filters change
+  useEffect(() => {
+    if (!showFilters) return; // Don't update URL for embedded mode
+
+    const params = new URLSearchParams();
+
+    if (filterState.categories.length > 0) {
+      params.set('category', filterState.categories[0]);
+    }
+
+    if (filterState.flags.length > 0) {
+      params.set('flags', filterState.flags.join(','));
+    }
+
+    // Build new URL
+    const queryString = params.toString();
+    const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+
+    // Update URL without triggering navigation
+    router.replace(newUrl, { scroll: false });
+  }, [filterState, pathname, router, showFilters]);
+
+  // Reset and fetch when filters change
+  useEffect(() => {
+    // Skip on initial mount - server already provided filtered data based on URL
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // When filters change, fetch new filtered data from API
+    // Don't reset to initialNews since that might be filtered for a different URL
+    if (filterState.categories.length > 0 || filterState.flags.length > 0) {
+      fetchNews(null, false);
+    } else {
+      // Filters cleared - reset to initial unfiltered news
+      setAllNews(initialNews);
+      setHasMore(initialNews.length >= 50);
+      setCursor(
+        initialNews.length > 0
+          ? initialNews[initialNews.length - 1].originalDate.toISOString()
+          : null
+      );
+    }
+  }, [filterState]);
 
   // Set up Intersection Observer for infinite scroll
   useEffect(() => {
@@ -94,9 +179,9 @@ export function NewsFeed({ initialNews, showFilters = true }: NewsFeedProps) {
       )}
 
       <div className={`space-y-4 ${showFilters ? 'mt-6' : ''}`}>
-        {filteredNews.length > 0 ? (
+        {allNews.length > 0 ? (
           <>
-            {filteredNews.map((item) => (
+            {allNews.map((item) => (
               <NewsCard key={item.id} news={item} />
             ))}
 

@@ -2,7 +2,7 @@ import { db, newsTable } from '@/lib/db/drizzle';
 import { NewsFeed } from '@/components/news/NewsFeed';
 import { UI_TEXT } from '@/lib/utils/constants';
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, or, sql } from 'drizzle-orm';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { EmailSubscriptionForm } from '@/components/layout/EmailSubscriptionForm';
@@ -26,12 +26,42 @@ interface NewsItem {
   publishedAt: Date | null;
 }
 
-export default async function HomePage() {
-  // Fetch published news
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function HomePage({ searchParams }: PageProps) {
+  // Await and extract search params
+  const params = await searchParams;
+  const categoryParam = params.category as string | undefined;
+  const flagsParam = params.flags as string | undefined;
+
+  // Fetch published news with filters
   let news: NewsItem[] = [];
   let dbError = false;
 
   try {
+    // Build query conditions
+    const conditions = [eq(newsTable.published, true)];
+
+    // Add category filter (single category)
+    if (categoryParam) {
+      const category = categoryParam as NewsCategory;
+      conditions.push(eq(newsTable.category, category));
+    }
+
+    // Add flags filter (array of flags - item must have at least one)
+    if (flagsParam) {
+      const flags = flagsParam.split(',') as NewsFlag[];
+      if (flags.length > 0) {
+        // Use PostgreSQL array overlap operator: flags && ARRAY['flag1', 'flag2']
+        const flagConditions = flags.map(flag =>
+          sql`${newsTable.flags} @> ARRAY[${flag}]::text[]`
+        );
+        conditions.push(or(...flagConditions)!);
+      }
+    }
+
     const newsRows = await db.select({
       id: newsTable.id,
       title: newsTable.title,
@@ -43,7 +73,7 @@ export default async function HomePage() {
       originalDate: newsTable.originalDate,
       publishedAt: newsTable.publishedAt,
     }).from(newsTable)
-      .where(eq(newsTable.published, true))
+      .where(and(...conditions))
       .orderBy(desc(newsTable.originalDate))
       .limit(50);
 
@@ -81,12 +111,8 @@ export default async function HomePage() {
                     Ocurrió un error al cargar las noticias. Por favor, inténtalo más tarde.
                   </p>
                 </div>
-              ) : news.length > 0 ? (
-                <NewsFeed initialNews={news} />
               ) : (
-                <div className="rounded-lg border border-dashed border-border bg-gray-50 dark:bg-gray-900 p-12 text-center">
-                  <p className="text-muted-foreground">{UI_TEXT.public.noNews}</p>
-                </div>
+                <NewsFeed initialNews={news} />
               )}
             </div>
           </div>
