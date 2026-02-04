@@ -10,8 +10,8 @@ const SCRAPER_LABELS: Record<string, string> = {
   'oficial-sources-mensaje': 'Mensaje',
   'oficial-sources-sala': 'Sala de Prensa',
   'oficial-sources-institucion': 'Institucional',
-  'news-outlets': 'Noticias',
   'noticias-la-republica': 'La República',
+  'noticias-gestion': 'Gestión',
 };
 
 function getScraperLabel(name: string): string {

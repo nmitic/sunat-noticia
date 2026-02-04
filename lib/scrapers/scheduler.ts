@@ -4,8 +4,8 @@ import { FacebookScraper } from './facebook';
 import { OficialSunatMensajesScraper } from './oficial-sunat-mensajes';
 import { OficialSunatSalaPresaScraper } from './oficial-sunat-salapresa';
 import { OficialSunatInstitucionScraper } from './oficial-sunat-institucion';
-import { NoticiasScraper } from './noticias-placeholder';
 import { NoticiasLaRepublicaScraper } from './noticias-la-republica';
+import { NoticiasGestionScraper } from './noticias-gestion';
 import { NewsCategory } from '@/lib/db/schema';
 
 /**
@@ -36,14 +36,14 @@ const scrapers: BaseScraper[] = [
     enabled: true,
     cronSchedule: '0 */6 * * *', // Every 6 hours
   }),
-  new NoticiasScraper({
-    name: 'news-outlets',
-    category: 'NOTICIAS' as NewsCategory,
-    enabled: false, // Disabled until implemented
-    cronSchedule: '0 */4 * * *', // Every 4 hours
-  }),
   new NoticiasLaRepublicaScraper({
     name: 'noticias-la-republica',
+    category: 'NOTICIAS' as NewsCategory,
+    enabled: true,
+    cronSchedule: '0 */4 * * *', // Every 4 hours
+  }),
+  new NoticiasGestionScraper({
+    name: 'noticias-gestion',
     category: 'NOTICIAS' as NewsCategory,
     enabled: true,
     cronSchedule: '0 */4 * * *', // Every 4 hours
