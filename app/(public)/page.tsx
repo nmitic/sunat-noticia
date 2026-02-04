@@ -172,18 +172,9 @@ export default async function HomePage() {
 
               {dbError ? (
                 <div className="rounded-lg border border-destructive bg-destructive/5 p-8 text-center">
-                  <h3 className="text-lg font-semibold text-destructive mb-2">Error de Conexión</h3>
-                  <p className="text-foreground/80 mb-4">
-                    No se pudo conectar a la base de datos. Por favor, asegúrate de que:
-                  </p>
-                  <ul className="text-left text-foreground/80 space-y-1 ml-4 mb-4">
-                    <li>• PostgreSQL está instalado y en ejecución</li>
-                    <li>• La variable DATABASE_URL está configurada en .env.local</li>
-                    <li>• La base de datos "sunat_noticias" existe</li>
-                    <li>• Has ejecutado las migraciones: <code className="bg-gray-50 dark:bg-gray-900 px-2 py-1 rounded text-foreground">npm run db:push</code></li>
-                  </ul>
-                  <p className="text-sm text-foreground/70">
-                    Para más ayuda, consulta <a href="/SETUP.md" className="underline text-primary hover:text-primary/80">SETUP.md</a>
+                  <h3 className="text-lg font-semibold text-destructive mb-2">Error</h3>
+                  <p className="text-foreground/80">
+                    Ocurrió un error al cargar las noticias. Por favor, inténtalo más tarde.
                   </p>
                 </div>
               ) : news.length > 0 ? (
