@@ -23,7 +23,7 @@ export function EmailSubscriptionForm() {
 
       if (response.ok) {
         setStatus('success');
-        setMessage('¡Suscripción exitosa! Revisa tu correo.');
+        setMessage('¡Suscripción exitosa! Gracias por su confianza.');
         setEmail('');
         setTimeout(() => setStatus('idle'), 5000);
       } else {
