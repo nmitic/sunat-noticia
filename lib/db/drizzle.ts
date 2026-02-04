@@ -18,8 +18,8 @@ const pool =
   new Pool({
     connectionString: process.env.POSTGRES_URL,
 
-    // REQUIRED for Supabase
-    ssl: { rejectUnauthorized: false },
+    // SSL required for cloud databases (Supabase, Vercel, etc.), disabled locally
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 
     // REQUIRED for Vercel serverless
     max: 3,
