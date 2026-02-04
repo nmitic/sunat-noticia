@@ -5,6 +5,7 @@ import { ReviewQueue } from './ReviewQueue';
 import { ScraperControls } from './ScraperControls';
 import { ScraperRunsLog } from './ScraperRunsLog';
 import { UI_TEXT } from '@/lib/utils/constants';
+import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 
 interface NewsItem {
   id: string;
@@ -12,8 +13,8 @@ interface NewsItem {
   content: string;
   source: string;
   sourceUrl?: string | null;
-  category: string;
-  flags: any[];
+  category: NewsCategory;
+  flags: NewsFlag[];
   originalDate: Date;
   scrapedAt: Date;
 }

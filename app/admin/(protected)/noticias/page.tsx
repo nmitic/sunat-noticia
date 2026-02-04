@@ -1,6 +1,7 @@
 import { db, newsTable } from '@/lib/db/drizzle';
 import { AdminNoticiasContent } from '@/components/admin/AdminNoticiasContent';
 import { eq, desc } from 'drizzle-orm';
+import { NewsFlag } from '@/lib/db/schema';
 
 export const metadata = {
   title: 'Noticias Pendientes - Panel Administrativo',
@@ -24,7 +25,7 @@ export default async function AdminNoticiasPage() {
 
   const news = newsRows.map(row => ({
     ...row,
-    flags: (row.flags as any[]) || [],
+    flags: (row.flags as NewsFlag[]) || [],
   }));
 
   return <AdminNoticiasContent initialNews={news} />;
