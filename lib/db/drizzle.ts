@@ -22,8 +22,10 @@ const pool =
   new Pool({
     connectionString: process.env.POSTGRES_URL,
 
-    // Supabase requires SSL; local Postgres does not
-    ssl: isLocalDb ? false : { rejectUnauthorized: false },
+    // Supabase uses self-signed certs; local Postgres has no SSL
+    ssl: isLocalDb
+      ? false
+      : { rejectUnauthorized: false, checkServerIdentity: () => undefined },
 
     // REQUIRED for Vercel serverless
     max: 3,
