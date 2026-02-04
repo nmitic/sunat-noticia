@@ -107,8 +107,6 @@ export function NewsFeed({ initialNews, embeded = false }: NewsFeedProps) {
 
   // Update URL when filters change
   useEffect(() => {
-    if (!embeded) return; // Don't update URL for embedded mode
-
     const params = new URLSearchParams();
 
     if (filterState.categories.length > 0) {
