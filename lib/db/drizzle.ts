@@ -12,14 +12,18 @@ if (!process.env.POSTGRES_URL) {
   throw new Error('POSTGRES_URL is not set');
 }
 
+const isLocalDb =
+  process.env.POSTGRES_URL?.includes('localhost') ||
+  process.env.POSTGRES_URL?.includes('127.0.0.1');
+
 // Create PostgreSQL connection pool (Vercel + Supabase safe)
 const pool =
   globalForDrizzle.pool ??
   new Pool({
     connectionString: process.env.POSTGRES_URL,
 
-    // SSL required for cloud databases (Supabase, Vercel, etc.), disabled locally
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    // Supabase requires SSL; local Postgres does not
+    ssl: isLocalDb ? false : { rejectUnauthorized: false },
 
     // REQUIRED for Vercel serverless
     max: 3,
