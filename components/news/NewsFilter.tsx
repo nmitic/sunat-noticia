@@ -60,7 +60,7 @@ export function NewsFilter({ onFilterChange, currentFilters }: NewsFilterProps) 
   const hasActiveFilters = currentFilters.categories.length > 0 || currentFilters.flags.length > 0;
 
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 sm:p-6 space-y-2 sm:space-y-4">
+    <div className=" rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 sm:p-6 space-y-2 sm:space-y-4">
       {/* Sources Section */}
       <div className="space-y-2 sm:space-y-3">
         <div className="mb-2 sm:mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">

@@ -21,10 +21,10 @@ interface NewsItem {
 
 interface NewsFeedProps {
   initialNews: NewsItem[];
-  showFilters?: boolean;
+  embeded?: boolean;
 }
 
-export function NewsFeed({ initialNews, showFilters = true }: NewsFeedProps) {
+export function NewsFeed({ initialNews, embeded = false }: NewsFeedProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -107,7 +107,7 @@ export function NewsFeed({ initialNews, showFilters = true }: NewsFeedProps) {
 
   // Update URL when filters change
   useEffect(() => {
-    if (!showFilters) return; // Don't update URL for embedded mode
+    if (!embeded) return; // Don't update URL for embedded mode
 
     const params = new URLSearchParams();
 
@@ -125,7 +125,7 @@ export function NewsFeed({ initialNews, showFilters = true }: NewsFeedProps) {
 
     // Update URL without triggering navigation
     router.replace(newUrl, { scroll: false });
-  }, [filterState, pathname, router, showFilters]);
+  }, [filterState, pathname, router, embeded]);
 
   // Reset and fetch when filters change
   useEffect(() => {
@@ -171,14 +171,14 @@ export function NewsFeed({ initialNews, showFilters = true }: NewsFeedProps) {
 
   return (
     <div className="space-y-4">
-      {showFilters && (
+      <div className={`sticky ${embeded ? 'top-4' : ' top-20'}`}>
         <NewsFilter
           currentFilters={filterState}
           onFilterChange={setFilterState}
         />
-      )}
+      </div>
 
-      <div className={`space-y-4 ${showFilters ? 'mt-6' : ''}`}>
+      <div className="space-y-4">
         {allNews.length > 0 ? (
           <>
             {allNews.map((item) => (

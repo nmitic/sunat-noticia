@@ -62,7 +62,7 @@ export default async function EmbeddedPage() {
           </p>
         </div>
       ) : (
-        <NewsFeed initialNews={news} />
+        <NewsFeed initialNews={news} embeded />
       )}
     </>
   );
