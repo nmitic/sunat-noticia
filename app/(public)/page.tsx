@@ -36,6 +36,9 @@ export default async function HomePage({ searchParams }: PageProps) {
   const categoryParam = params.category as string | undefined;
   const flagsParam = params.flags as string | undefined;
 
+  // Create a key for NewsFeed based on filters to force remount when filters change
+  const feedKey = `${categoryParam || 'all'}-${flagsParam || 'none'}`;
+
   // Fetch published news with filters
   let news: NewsItem[] = [];
   let dbError = false;
@@ -112,7 +115,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                   </p>
                 </div>
               ) : (
-                <NewsFeed initialNews={news} />
+                <NewsFeed key={feedKey} initialNews={news} />
               )}
             </div>
           </div>
