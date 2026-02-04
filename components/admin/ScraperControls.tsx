@@ -11,6 +11,7 @@ const SCRAPERS = [
   { name: 'oficial-sources-sala', label: 'Oficial Salapresa' },
   { name: 'oficial-sources-institucion', label: 'Oficial Institucion' },
   { name: 'news-outlets', label: 'Outlets de Noticias' },
+  { name: 'noticias-la-republica', label: 'Noticias La República' },
 ];
 
 interface ScraperControlsProps {

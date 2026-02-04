@@ -5,6 +5,7 @@ import { OficialSunatMensajesScraper } from './oficial-sunat-mensajes';
 import { OficialSunatSalaPresaScraper } from './oficial-sunat-salapresa';
 import { OficialSunatInstitucionScraper } from './oficial-sunat-institucion';
 import { NoticiasScraper } from './noticias-placeholder';
+import { NoticiasLaRepublicaScraper } from './noticias-la-republica';
 import { NewsCategory } from '@/lib/db/schema';
 
 /**
@@ -39,6 +40,12 @@ const scrapers: BaseScraper[] = [
     name: 'news-outlets',
     category: 'NOTICIAS' as NewsCategory,
     enabled: false, // Disabled until implemented
+    cronSchedule: '0 */4 * * *', // Every 4 hours
+  }),
+  new NoticiasLaRepublicaScraper({
+    name: 'noticias-la-republica',
+    category: 'NOTICIAS' as NewsCategory,
+    enabled: true,
     cronSchedule: '0 */4 * * *', // Every 4 hours
   }),
 ];
