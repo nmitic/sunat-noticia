@@ -3,20 +3,31 @@ import { Pool } from 'pg';
 import * as schema from './schema';
 
 const globalForDrizzle = global as unknown as {
-  pool: Pool | undefined;
-  db: ReturnType<typeof drizzle> | undefined;
+  pool?: Pool;
+  db?: ReturnType<typeof drizzle>;
 };
 
-// Create PostgreSQL connection pool
+// Fail fast — avoids silent prod failures on Vercel
+if (!process.env.POSTGRES_URL) {
+  throw new Error('POSTGRES_URL is not set');
+}
+
+// Create PostgreSQL connection pool (Vercel + Supabase safe)
 const pool =
   globalForDrizzle.pool ??
   new Pool({
     connectionString: process.env.POSTGRES_URL,
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+
+    // REQUIRED for Supabase
+    ssl: { rejectUnauthorized: false },
+
+    // REQUIRED for Vercel serverless
+    max: 3,
+    idleTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 2_000,
   });
 
+// Prevent pool recreation during local HMR
 if (process.env.NODE_ENV !== 'production') {
   globalForDrizzle.pool = pool;
 }
@@ -29,6 +40,7 @@ export const db =
     logger: process.env.NODE_ENV !== 'production',
   });
 
+// Prevent Drizzle re-creation during local HMR
 if (process.env.NODE_ENV !== 'production') {
   globalForDrizzle.db = db;
 }
