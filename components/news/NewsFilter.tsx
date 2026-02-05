@@ -70,16 +70,17 @@ export function NewsFilter({ currentFilters }: NewsFilterProps) {
     return queryString ? `${pathname}?${queryString}` : pathname;
   };
 
-  const hasActiveFilters = currentFilters.categories.length > 0 || currentFilters.flags.length > 0;
-
   return (
     <div className=" rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 sm:p-6 space-y-2 sm:space-y-4">
       {/* Sources Section */}
       <div className="space-y-2 sm:space-y-3">
-        <div className="mb-2 sm:mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <div className="hidden md:block mb-2 sm:mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           {UI_TEXT.filters.sourcesLabel}
         </div>
         <div className="flex overflow-x-auto sm:grid sm:grid-cols-4 gap-1.5 sm:gap-2 pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
+          <div className="md:hidden flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300">
+            {UI_TEXT.filters.sourcesLabel}
+          </div>
           {/* "Todas" link */}
           <Link
             href={buildCategoryHref(null)}
@@ -117,29 +118,21 @@ export function NewsFilter({ currentFilters }: NewsFilterProps) {
       {/* Flags Section */}
       <div className="space-y-2 sm:space-y-3">
         <div className="py-2 sm:py-3 flex justify-between mb-2 sm:mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-          <div>{UI_TEXT.filters.flagsLabel}</div>
-          {/* Clear Filters Button */}
-          {hasActiveFilters && (
-            <Link
-              href={pathname}
-              className="cursor-pointer w-full sm:w-auto underline"
-            >
-              {UI_TEXT.filters.clearFilters}
-            </Link>
-          )}
+          <div className="hidden md:block">{UI_TEXT.filters.flagsLabel}</div>
         </div>
-        <div className="flex overflow-x-auto sm:flex-wrap gap-2 sm:gap-3 pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
+        <div className="flex overflow-x-auto sm:grid sm:grid-cols-5 gap-1.5 sm:gap-2 pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
+          <div className="md:hidden flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300">{UI_TEXT.filters.flagsLabel}</div>
+
           {flags.map((flag) => {
             const isActive = currentFilters.flags.includes(flag);
             return (
               <Link
                 key={flag}
                 href={buildFlagHref(flag)}
-                className={`text-sm font-medium cursor-pointer px-2 py-0.5 sm:py-1 rounded whitespace-nowrap transition-opacity ${
-                  isActive
-                    ? getFlagColorClasses(flag)
-                    : 'text-gray-700 dark:text-gray-300 hover:opacity-70'
-                }`}
+                className={`text-sm text-center font-medium cursor-pointer px-2 py-0.5 sm:py-1 rounded whitespace-nowrap transition-opacity ${isActive
+                  ? getFlagColorClasses(flag)
+                  : 'text-gray-700 dark:text-gray-300 hover:opacity-70'
+                  }`}
               >
                 {getFlagLabel(flag)}
               </Link>
