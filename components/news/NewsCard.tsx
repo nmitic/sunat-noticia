@@ -150,7 +150,7 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
               rel="noopener noreferrer"
               className="text-xs font-medium text-blue-600 hover:underline"
             >
-              Ver original →
+              Leer más →
             </a>
           )}
         </div>

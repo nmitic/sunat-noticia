@@ -2,7 +2,7 @@ import { DabogLogo } from "@/components/DabogLogo";
 
 export function Footer() {
   return (
-    <footer className="border-t border-gray-200 bg-gray-50 dark:bg-gray-900">
+    <footer className="border-t border-gray-200 bg-gray-400 dark:bg-gray-900">
       <div className="mx-auto max-w-4xl px-4 pt-12 pb-24 sm:px-6 sm:py-12 lg:px-8">
         <div className="space-y-8">
           <div className="flex justify-center">
