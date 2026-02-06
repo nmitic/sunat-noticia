@@ -1,7 +1,6 @@
 'use client';
 
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
-import { Separator } from '@/components/ui/separator';
 import { UI_TEXT, getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
 import { getFlagColorClasses } from '@/lib/utils/badges';
 import { Newspaper } from 'lucide-react';
@@ -74,13 +73,9 @@ export function NewsFilter({ currentFilters }: NewsFilterProps) {
     <div className=" rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 sm:p-6 space-y-2 sm:space-y-4">
       {/* Sources Section */}
       <div className="space-y-2 sm:space-y-3">
-        <div className="hidden md:block mb-2 sm:mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-          {UI_TEXT.filters.sourcesLabel}
-        </div>
+
         <div className="flex overflow-x-auto sm:grid sm:grid-cols-4 gap-1.5 sm:gap-2 pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
-          <div className="md:hidden flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300">
-            {UI_TEXT.filters.sourcesLabel}
-          </div>
+
           {/* "Todas" link */}
           <Link
             href={buildCategoryHref(null)}
@@ -113,15 +108,10 @@ export function NewsFilter({ currentFilters }: NewsFilterProps) {
         </div>
       </div>
 
-      <Separator />
-
       {/* Flags Section */}
       <div className="space-y-2 sm:space-y-3">
-        <div className="py-2 sm:py-3 flex justify-between mb-2 sm:mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-          <div className="hidden md:block">{UI_TEXT.filters.flagsLabel}</div>
-        </div>
+
         <div className="flex overflow-x-auto sm:grid sm:grid-cols-5 gap-1.5 sm:gap-2 pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
-          <div className="md:hidden flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300">{UI_TEXT.filters.flagsLabel}</div>
 
           {flags.map((flag) => {
             const isActive = currentFilters.flags.includes(flag);

@@ -118,7 +118,7 @@ export function NewsFeed({ initialNews, embeded = false, isAdmin = false }: News
 
   return (
     <div className="space-y-4">
-      <div className={`sticky ${embeded ? 'top-4' : 'top-12 md:top-20'}`}>
+      <div className={`sticky ${embeded ? 'top-4' : 'top-0'}`}>
         <NewsFilter
           currentFilters={currentFilters}
         />
