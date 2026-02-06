@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db, newsTable } from '@/lib/db/drizzle';
 import { eq, desc, and, lt, or, sql } from 'drizzle-orm';
 import { NewsFlag, NewsCategory } from '@/lib/db/schema';
+import { injectAds } from '@/lib/ads';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -57,10 +58,20 @@ export async function GET(request: Request) {
 
     // Check if more items exist
     const hasMore = newsRows.length > limit;
-    const news = newsRows.slice(0, limit).map(row => ({
+    let news = newsRows.slice(0, limit).map(row => ({
       ...row,
       flags: (row.flags as NewsFlag[]) || [],
     }));
+
+    // Check if embedded mode (from referer header)
+    const referer = request.headers.get('referer') || '';
+    const isEmbedded = referer.includes('/embeded');
+
+    // Inject ads only if not embedded
+    if (!isEmbedded) {
+      const { items: newsWithAds } = injectAds({ items: news });
+      news = newsWithAds;
+    }
 
     // Next cursor is the originalDate of the last item
     const nextCursor = hasMore && news.length > 0
