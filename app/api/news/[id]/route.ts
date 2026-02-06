@@ -41,7 +41,15 @@ export async function PATCH(
       .where(eq(newsTable.id, id))
       .returning();
 
-    return NextResponse.json(news, { status: 200 });
+    // Serialize dates to ISO strings for JSON response
+    const serializedNews = {
+      ...news,
+      originalDate: news.originalDate.toISOString(),
+      scrapedAt: news.scrapedAt.toISOString(),
+      publishedAt: news.publishedAt ? news.publishedAt.toISOString() : null,
+    };
+
+    return NextResponse.json(serializedNews, { status: 200 });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error updating news:', message);

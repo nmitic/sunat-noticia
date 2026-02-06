@@ -5,6 +5,7 @@ import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { NewsCard } from './NewsCard';
 import { FlagSelector } from './FlagSelector';
 import { UI_TEXT } from '@/lib/utils/constants';
+import { Send, Trash2 } from 'lucide-react';
 
 interface NewsItem {
   id: string;
@@ -171,16 +172,18 @@ export function ReviewQueue({ initialNews, onNewsUpdated }: ReviewQueueProps) {
           <button
             onClick={handlePublishAll}
             disabled={bulkLoading !== null || loading !== null}
-            className="rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
+            <Send className="w-3 h-3" />
             {bulkLoading === 'publish' ? 'Publicando todas...' : 'Publicar todas'}
           </button>
           <button
             onClick={handleRejectAll}
             disabled={bulkLoading !== null || loading !== null}
-            className="rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {bulkLoading === 'reject' ? 'Rechazando todas...' : 'Rechazar todas'}
+            <Trash2 className="w-3 h-3" />
+            {bulkLoading === 'reject' ? 'Eliminando todas...' : 'Eliminar todas'}
           </button>
         </div>
       )}
@@ -201,16 +204,20 @@ export function ReviewQueue({ initialNews, onNewsUpdated }: ReviewQueueProps) {
               <button
                 onClick={() => handlePublish(item.id)}
                 disabled={loading === item.id}
-                className="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:brightness-110 disabled:bg-muted transition-colors"
+                className="flex-1 flex items-center justify-center gap-1 px-3 py-1 text-xs font-medium text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Publicar noticia"
               >
+                <Send className="w-3 h-3" />
                 {loading === item.id ? 'Publicando...' : UI_TEXT.admin.publish}
               </button>
               <button
                 onClick={() => handleReject(item.id)}
                 disabled={loading === item.id}
-                className="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:brightness-110 disabled:bg-muted transition-colors"
+                className="flex-1 flex items-center justify-center gap-1 px-3 py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Eliminar noticia"
               >
-                {loading === item.id ? 'Rechazando...' : UI_TEXT.admin.reject}
+                <Trash2 className="w-3 h-3" />
+                {loading === item.id ? 'Eliminando...' : UI_TEXT.admin.reject}
               </button>
             </div>
           </div>

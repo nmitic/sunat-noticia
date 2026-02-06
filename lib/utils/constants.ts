@@ -17,7 +17,7 @@ export const UI_TEXT = {
     login: 'Iniciar Sesión',
     logout: 'Cerrar Sesión',
     publish: 'Publicar',
-    reject: 'Rechazar',
+    reject: 'Eliminar',
     reviewQueue: 'Noticias Pendientes',
     published: 'Noticias Publicadas',
     noNews: 'No hay noticias pendientes',

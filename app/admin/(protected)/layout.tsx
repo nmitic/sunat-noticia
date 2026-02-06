@@ -26,6 +26,12 @@ export default async function ProtectedAdminLayout({
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <Link
+                href="/"
+                className="px-3 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+              >
+                Inicio
+              </Link>
               <span className="font-bold text-sm text-gray-600 dark:text-gray-300">{session.user?.name}</span>
             </div>
             <div className="flex items-center gap-4">
