@@ -4,9 +4,17 @@ import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { eq, desc, and, or, sql } from 'drizzle-orm';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { EmailSubscriptionForm } from '@/components/layout/EmailSubscriptionForm';
+import {
+  EmailSubscriptionBar,
+  EmailSubscriptionCard,
+} from '@/components/layout/EmailSubscriptionForm';
+import { SeverityLegend } from '@/components/news/SeverityLegend';
+import { PerunioAd } from '@/components/ads/PerunioAd';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { RadioTower } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,27 +102,43 @@ export default async function HomePage({ searchParams }: PageProps) {
     dbError = true;
   }
 
+  // Freshness indicator, driven by the newest item actually on the page.
+  const lastUpdated =
+    news.length > 0
+      ? formatDistanceToNow(new Date(news[0].originalDate), { addSuffix: true, locale: es })
+      : null;
+
   return (
     <>
       <Header isAdmin={isAdmin} />
+
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Desktop layout: title + content + sidebar */}
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col gap-8 lg:flex-row">
           {/* Main content area */}
-          <div className="flex-1 min-w-0">
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-50">
+          <div className="min-w-0 flex-1">
+            <div className="space-y-6">
+              <header className="space-y-3">
+                <h1 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl">
                   Noticias de SUNAT
-                </h2>
-                <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">
-                  Últimas noticias de fuentes oficiales, redes sociales y medios de comunicación
+                </h1>
+                <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
+                  Comunicados, avisos y alertas de fuentes oficiales de SUNAT, actualizados
+                  automáticamente.
                 </p>
-              </div>
+
+                {lastUpdated && (
+                  <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <RadioTower className="size-3.5" aria-hidden="true" />
+                    Última noticia {lastUpdated}
+                  </p>
+                )}
+
+                <SeverityLegend />
+              </header>
 
               {dbError ? (
                 <div className="rounded-lg border border-destructive bg-destructive/5 p-8 text-center">
-                  <h3 className="text-lg font-semibold text-destructive mb-2">Error</h3>
+                  <h2 className="mb-2 text-lg font-semibold text-destructive">Error</h2>
                   <p className="text-foreground/80">
                     Ocurrió un error al cargar las noticias. Por favor, inténtalo más tarde.
                   </p>
@@ -123,14 +147,28 @@ export default async function HomePage({ searchParams }: PageProps) {
                 <NewsFeed key={feedKey} initialNews={news} isAdmin={isAdmin} />
               )}
             </div>
+
+            {/* Below lg the rail collapses, so the ad follows the feed instead
+                of disappearing entirely. */}
+            <div className="mt-10 lg:hidden">
+              <PerunioAd slug="plataforma" />
+            </div>
           </div>
 
-          {/* Subscription form */}
-          <EmailSubscriptionForm />
+          {/* Right rail: subscribe + Perunio units */}
+          <aside className="hidden shrink-0 lg:block lg:w-80">
+            <div className="sticky top-20 space-y-6">
+              <EmailSubscriptionCard />
+              <PerunioAd slug="plataforma" />
+              <PerunioAd slug="automatiza" variant="compact" />
+            </div>
+          </aside>
         </div>
       </div>
+
+      <EmailSubscriptionBar />
+
       <Footer />
     </>
-
   );
 }

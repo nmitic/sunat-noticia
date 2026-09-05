@@ -1,13 +1,20 @@
 'use client';
 
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { getCategoryColorClasses, getFlagColorClasses } from '@/lib/utils/badges';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  getFlagChipClasses,
+  getPrimaryFlag,
+  getSeverity,
+  getSeverityAccentClasses,
+  getSeverityTintClasses,
+} from '@/lib/utils/badges';
+import { FlagIcon } from '@/lib/utils/flag-icons';
 import { getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
-import { formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Trash2, EyeOff } from 'lucide-react';
+import { Trash2, EyeOff, Calendar, ExternalLink, BadgeCheck } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -27,24 +34,48 @@ interface NewsCardProps {
   isAdmin?: boolean;
 }
 
-const getCategoryIcon = (category: NewsCategory) => {
-  switch (category) {
-    case 'OFICIAL':
-      return <Image src="/sunat.svg" alt="SUNAT" width={16} height={16} />;
-  }
-};
+/**
+ * Absolute publication date, spelled out. "Hoy"/"Ayer" replace the date for
+ * recent items, where the weekday matters more than the numeral.
+ */
+function formatAbsoluteDate(date: Date): string {
+  const time = format(date, 'HH:mm', { locale: es });
+
+  if (isToday(date)) return `Hoy, ${time}`;
+  if (isYesterday(date)) return `Ayer, ${time}`;
+
+  return format(date, "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es });
+}
 
 export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUnpublishing, setIsUnpublishing] = useState(false);
 
-  const dateStr = formatDistanceToNow(new Date(news.originalDate), {
+  const originalDate = new Date(news.originalDate);
+  const absoluteDate = formatAbsoluteDate(originalDate);
+  const relativeDate = formatDistanceToNow(originalDate, {
     addSuffix: true,
     locale: es,
   });
 
   const flags = news.flags || [];
+  const primaryFlag = getPrimaryFlag(flags);
+  const secondaryFlags = flags.filter((flag) => flag !== primaryFlag);
+  const severity = primaryFlag ? getSeverity(primaryFlag) : null;
+
+  // Unflagged items stay visually quiet so that flagged ones carry weight.
+  const accentClasses = severity
+    ? `border-l-4 ${getSeverityAccentClasses(severity)}`
+    : 'border-l-4 border-l-transparent';
+  const tintClasses = severity ? getSeverityTintClasses(severity) : '';
+
+  // Only surface the approval time when it meaningfully trails the source date.
+  const publishedAt = news.publishedAt ? new Date(news.publishedAt) : null;
+  const dateTitle =
+    publishedAt && Math.abs(publishedAt.getTime() - originalDate.getTime()) > 60 * 60 * 1000
+      ? `Publicado en SUNAT Noticias el ${format(publishedAt, "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })}`
+      : undefined;
 
   const handleDelete = async () => {
     if (!news.id) return;
@@ -106,74 +137,117 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 space-y-2">
-            <CardTitle className="text-xl">
-              {news.title}
-            </CardTitle>
-            <p className="text-sm text-gray-600">{news.source}</p>
-          </div>
-          <Badge variant="outline" className={`flex items-center gap-2 ${getCategoryColorClasses(news.category)}`}>
-            {getCategoryIcon(news.category)}
-            {getCategoryLabel(news.category)}
-          </Badge>
+    <Card
+      className={`group gap-0 overflow-hidden py-0 transition-all hover:border-foreground/15 hover:shadow-md ${accentClasses}`}
+    >
+      {/* Severity row + verified source mark */}
+      <div
+        className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-5 pt-4 pb-3 ${tintClasses}`}
+      >
+        <div className="flex flex-wrap items-center gap-1.5">
+          {primaryFlag ? (
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold tracking-wide uppercase ${getFlagChipClasses(primaryFlag)}`}
+            >
+              <FlagIcon flag={primaryFlag} className="size-3.5" />
+              {getFlagLabel(primaryFlag)}
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+              Comunicado
+            </span>
+          )}
+
+          {secondaryFlags.map((flag) => (
+            <span
+              key={flag}
+              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${getFlagChipClasses(flag)}`}
+            >
+              <FlagIcon flag={flag} className="size-3" />
+              {getFlagLabel(flag)}
+            </span>
+          ))}
         </div>
-      </CardHeader>
 
-      <CardContent className="space-y-4">
-        <p className="text-gray-600 dark:text-gray-400 line-clamp-3">{news.content}</p>
+        <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <Image src="/sunat.svg" alt="" width={14} height={14} aria-hidden="true" />
+          SUNAT {getCategoryLabel(news.category)}
+          <BadgeCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+        </span>
+      </div>
 
-        {flags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {flags.map((flag) => (
-              <Badge key={flag} variant="outline" className={getFlagColorClasses(flag)}>
-                {getFlagLabel(flag)}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </CardContent>
-
-      <CardFooter className="flex items-center justify-between pt-2 border-t">
-        <div className="flex items-center gap-4 flex-1">
-          <span className="text-xs text-gray-500">{dateStr}</span>
-          {news.sourceUrl && (
+      {/* Headline + excerpt */}
+      <div className="space-y-2 px-5 pb-4">
+        <h3 className="text-lg leading-snug font-semibold text-balance">
+          {news.sourceUrl ? (
             <a
               href={news.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-medium text-blue-600 hover:underline"
+              className="line-clamp-3 decoration-2 underline-offset-4 hover:underline"
             >
-              Leer más →
+              {news.title}
             </a>
+          ) : (
+            <span className="line-clamp-3">{news.title}</span>
+          )}
+        </h3>
+
+        <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+          {news.content}
+        </p>
+      </div>
+
+      {/* Date bar — the absolute date leads, the relative one supports it */}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border px-5 py-3">
+        <time
+          dateTime={originalDate.toISOString()}
+          title={dateTitle}
+          className="inline-flex items-center gap-2 text-sm"
+        >
+          <Calendar className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <span className="font-medium text-foreground">{absoluteDate}</span>
+          <span className="text-muted-foreground">· {relativeDate}</span>
+        </time>
+
+        <div className="flex items-center gap-1">
+          {isAdmin && news.id && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleUnpublish}
+                disabled={isUnpublishing}
+                className="text-muted-foreground hover:text-foreground"
+                title="Despublicar noticia"
+              >
+                <EyeOff />
+                {isUnpublishing ? 'Despublicando...' : 'Despublicar'}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                title="Eliminar noticia"
+              >
+                <Trash2 />
+                {isDeleting ? 'Eliminando...' : 'Eliminar'}
+              </Button>
+            </>
+          )}
+
+          {news.sourceUrl && (
+            <Button variant="outline" size="sm" asChild>
+              <a href={news.sourceUrl} target="_blank" rel="noopener noreferrer">
+                Leer más
+                <ExternalLink />
+              </a>
+            </Button>
           )}
         </div>
-
-        {isAdmin && news.id && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleUnpublish}
-              disabled={isUnpublishing}
-              className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-orange-600 hover:text-orange-800 hover:bg-orange-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Despublicar noticia"
-            >
-              <EyeOff className="w-3 h-3" />
-              {isUnpublishing ? 'Despublicando...' : 'Despublicar'}
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Eliminar noticia"
-            >
-              <Trash2 className="w-3 h-3" />
-              {isDeleting ? 'Eliminando...' : 'Eliminar'}
-            </button>
-          </div>
-        )}
-      </CardFooter>
+      </div>
     </Card>
   );
 }

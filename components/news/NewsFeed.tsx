@@ -6,6 +6,7 @@ import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { NewsCard } from './NewsCard';
 import { NewsFilter, FilterState } from './NewsFilter';
 import { UI_TEXT } from '@/lib/utils/constants';
+import { SearchX } from 'lucide-react';
 
 interface NewsItem {
   id: string;
@@ -117,10 +118,9 @@ export function NewsFeed({ initialNews, embeded = false, isAdmin = false }: News
 
   return (
     <div className="space-y-4">
-      <div className={`sticky ${embeded ? 'top-4' : 'top-0'}`}>
-        <NewsFilter
-          currentFilters={currentFilters}
-        />
+      {/* top-16 clears the sticky site header; the embed has no header */}
+      <div className={`sticky z-30 ${embeded ? 'top-4' : 'top-16'} bg-background py-2`}>
+        <NewsFilter currentFilters={currentFilters} />
       </div>
 
       <div className="space-y-4">
@@ -135,21 +135,37 @@ export function NewsFeed({ initialNews, embeded = false, isAdmin = false }: News
 
             {/* Loading state */}
             {loading && (
-              <div className="flex justify-center py-8">
-                <div className="text-muted-foreground">Cargando más noticias...</div>
+              <div className="space-y-4" aria-live="polite" aria-busy="true">
+                <span className="sr-only">Cargando más noticias…</span>
+                {[0, 1].map((i) => (
+                  <div
+                    key={i}
+                    className="animate-pulse rounded-xl border border-l-4 border-border border-l-transparent bg-card p-5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="h-5 w-28 rounded-full bg-muted" />
+                      <div className="h-4 w-24 rounded bg-muted" />
+                    </div>
+                    <div className="mt-4 h-5 w-4/5 rounded bg-muted" />
+                    <div className="mt-2 h-4 w-full rounded bg-muted" />
+                    <div className="mt-2 h-4 w-2/3 rounded bg-muted" />
+                    <div className="mt-5 h-4 w-52 rounded bg-muted" />
+                  </div>
+                ))}
               </div>
             )}
 
             {/* End of results */}
-            {!hasMore && allNews.length > 0 && (
-              <div className="text-center py-8 text-muted-foreground">
+            {!hasMore && (
+              <p className="py-8 text-center text-sm text-muted-foreground">
                 No hay más noticias
-              </div>
+              </p>
             )}
           </>
         ) : (
-          <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-8 text-center">
-            <p className="text-gray-600">{UI_TEXT.filters.noResults}</p>
+          <div className="rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center">
+            <SearchX className="mx-auto size-8 text-muted-foreground" aria-hidden="true" />
+            <p className="mt-3 text-sm text-muted-foreground">{UI_TEXT.filters.noResults}</p>
           </div>
         )}
       </div>

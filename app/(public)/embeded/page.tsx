@@ -1,6 +1,5 @@
 import { db, newsTable } from '@/lib/db/drizzle';
 import { NewsFeed } from '@/components/news/NewsFeed';
-import { UI_TEXT } from '@/lib/utils/constants';
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { eq, desc, and, or, sql } from 'drizzle-orm';
 

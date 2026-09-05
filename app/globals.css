@@ -35,6 +35,26 @@
   --sidebar-accent-foreground: #171717;
   --sidebar-border: #e5e5e5;
   --sidebar-ring: #a1a1a1;
+
+  /* Severity ramp — drives the news flag chips and card accent bars.
+     Deliberately kept off --primary (coral #ff5758), which is reserved
+     for Perunio promotional units, so "urgent" never reads as "ad". */
+  --sev-critical: #e11d48;
+  --sev-critical-bg: #fff1f2;
+  --sev-critical-fg: #9f1239;
+  --sev-outage: #7c3aed;
+  --sev-outage-bg: #f5f3ff;
+  --sev-outage-fg: #5b21b6;
+  --sev-high: #d97706;
+  --sev-high-bg: #fffbeb;
+  --sev-high-fg: #92400e;
+  --sev-info: #2563eb;
+  --sev-info-bg: #eff6ff;
+  --sev-info-fg: #1e40af;
+  --sev-neutral: #475569;
+  --sev-neutral-bg: #f8fafc;
+  --sev-neutral-fg: #334155;
+
   --font-sans: ui-sans-serif,
     system-ui,
     -apple-system,
@@ -115,6 +135,25 @@
     --sidebar-accent-foreground: #fafafa;
     --sidebar-border: #282828;
     --sidebar-ring: #525252;
+
+    /* Severity ramp — same hues, inverted so chips stay legible on dark cards.
+       The light-mode -bg values (red-50 etc.) are unreadable here. */
+    --sev-critical: #fb7185;
+    --sev-critical-bg: #4c0519;
+    --sev-critical-fg: #fda4af;
+    --sev-outage: #a78bfa;
+    --sev-outage-bg: #2e1065;
+    --sev-outage-fg: #c4b5fd;
+    --sev-high: #fbbf24;
+    --sev-high-bg: #451a03;
+    --sev-high-fg: #fcd34d;
+    --sev-info: #60a5fa;
+    --sev-info-bg: #172554;
+    --sev-info-fg: #93c5fd;
+    --sev-neutral: #94a3b8;
+    --sev-neutral-bg: #1e293b;
+    --sev-neutral-fg: #cbd5e1;
+
     --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -163,6 +202,22 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-sev-critical: var(--sev-critical);
+  --color-sev-critical-bg: var(--sev-critical-bg);
+  --color-sev-critical-fg: var(--sev-critical-fg);
+  --color-sev-outage: var(--sev-outage);
+  --color-sev-outage-bg: var(--sev-outage-bg);
+  --color-sev-outage-fg: var(--sev-outage-fg);
+  --color-sev-high: var(--sev-high);
+  --color-sev-high-bg: var(--sev-high-bg);
+  --color-sev-high-fg: var(--sev-high-fg);
+  --color-sev-info: var(--sev-info);
+  --color-sev-info-bg: var(--sev-info-bg);
+  --color-sev-info-fg: var(--sev-info-fg);
+  --color-sev-neutral: var(--sev-neutral);
+  --color-sev-neutral-bg: var(--sev-neutral-bg);
+  --color-sev-neutral-fg: var(--sev-neutral-fg);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);

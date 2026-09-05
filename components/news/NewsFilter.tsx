@@ -1,8 +1,10 @@
 'use client';
 
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
-import { getFlagLabel } from '@/lib/utils/constants';
-import { getFlagColorClasses } from '@/lib/utils/badges';
+import { getFlagLabel, UI_TEXT } from '@/lib/utils/constants';
+import { getFlagChipClasses } from '@/lib/utils/badges';
+import { FlagIcon } from '@/lib/utils/flag-icons';
+import { X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -15,9 +17,18 @@ interface NewsFilterProps {
   currentFilters: FilterState;
 }
 
+// Ordered by severity, so the bar reads most- to least-urgent.
+const FILTER_FLAGS: NewsFlag[] = [
+  'URGENTE',
+  'CAIDA_SISTEMA',
+  'IMPORTANTE',
+  'ACTUALIZACION',
+  'SALA_PRENSA',
+];
+
 export function NewsFilter({ currentFilters }: NewsFilterProps) {
   const pathname = usePathname();
-  const flags: NewsFlag[] = ['IMPORTANTE', 'ACTUALIZACION', 'URGENTE', 'CAIDA_SISTEMA', 'SALA_PRENSA'];
+  const hasActiveFilter = currentFilters.flags.length > 0;
 
   // Build href for flag link (single selection, toggle if active)
   const buildFlagHref = (flag: NewsFlag) => {
@@ -31,37 +42,51 @@ export function NewsFilter({ currentFilters }: NewsFilterProps) {
     // Single flag selection: if clicking active flag, clear it; else set it
     const isCurrentlyActive = currentFilters.flags.includes(flag);
     if (!isCurrentlyActive) {
-      params.set('flags', flag); // Set single flag
+      params.set('flags', flag);
     }
-    // If currently active, don't add flags param (clears it)
 
     const queryString = params.toString();
     return queryString ? `${pathname}?${queryString}` : pathname;
   };
 
   return (
-    <div className=" rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 sm:p-6 space-y-2 sm:space-y-4">
-      {/* Flags Section */}
-      <div className="space-y-2 sm:space-y-3">
-
-        <div className="flex overflow-x-auto sm:grid sm:grid-cols-5 gap-1.5 sm:gap-2 pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
-
-          {flags.map((flag) => {
+    <div className="rounded-lg border border-border bg-card p-3 shadow-sm sm:p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div
+          className="-mx-1 flex flex-1 gap-1.5 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0"
+          role="group"
+          aria-label="Filtrar noticias por etiqueta"
+        >
+          {FILTER_FLAGS.map((flag) => {
             const isActive = currentFilters.flags.includes(flag);
+
             return (
               <Link
                 key={flag}
                 href={buildFlagHref(flag)}
-                className={`text-sm text-center font-medium cursor-pointer px-2 py-0.5 sm:py-1 rounded whitespace-nowrap transition-opacity ${isActive
-                  ? getFlagColorClasses(flag)
-                  : 'text-gray-700 dark:text-gray-300 hover:opacity-70'
-                  }`}
+                aria-pressed={isActive}
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
+                  isActive
+                    ? `${getFlagChipClasses(flag)} ring-2 ring-offset-1 ring-offset-card`
+                    : 'border-border text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
               >
+                <FlagIcon flag={flag} className="size-3.5" />
                 {getFlagLabel(flag)}
               </Link>
             );
           })}
         </div>
+
+        {hasActiveFilter && (
+          <Link
+            href={pathname}
+            className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <X className="size-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">{UI_TEXT.filters.clearFilters}</span>
+          </Link>
+        )}
       </div>
     </div>
   );

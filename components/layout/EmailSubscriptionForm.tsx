@@ -4,8 +4,12 @@ import { useState, FormEvent } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { UI_TEXT } from '@/lib/utils/constants';
+import { Mail, CheckCircle2 } from 'lucide-react';
 
-export function EmailSubscriptionForm() {
+/**
+ * Shared submit logic for both placements.
+ */
+function useSubscription() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -31,90 +35,106 @@ export function EmailSubscriptionForm() {
         setStatus('error');
         setMessage(data.error || 'Error al suscribirse');
       }
-    } catch (error) {
+    } catch {
       setStatus('error');
       setMessage('Error al suscribirse. Intenta de nuevo.');
     }
   }
 
-  // Desktop sidebar layout
-  const desktopContent = (
-    <div className="hidden lg:block lg:w-80">
-      <div className="sticky top-20 rounded-lg bg-gray-50 dark:bg-gray-800 p-6 border border-border shadow-sm">
-        <h3 className="text-lg font-semibold text-card-foreground mb-4">
-          {UI_TEXT.public.subscribe}
-        </h3>
+  return { email, setEmail, status, message, handleSubmit };
+}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="email"
-            placeholder={UI_TEXT.public.emailPlaceholder}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={status === 'loading'}
-            className="w-full rounded-lg border border-input bg-gray-50 dark:bg-gray-900 px-4 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={status === 'loading'}
-            className="w-full rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-          >
-            {status === 'loading' ? 'Enviando...' : UI_TEXT.public.subscribeButton}
-          </button>
-        </form>
+/**
+ * Sidebar card. Rendered inside the sticky right rail on lg and up.
+ */
+export function EmailSubscriptionCard() {
+  const { email, setEmail, status, message, handleSubmit } = useSubscription();
 
-        {status === 'success' && (
-          <p className="text-sm font-medium text-green-600 mt-3">{message}</p>
-        )}
-        {status === 'error' && (
-          <p className="text-sm font-medium text-red-600 mt-3">{message}</p>
-        )}
+  return (
+    <section className="rounded-lg border border-border bg-card p-5 shadow-sm">
+      <div className="flex items-center gap-2">
+        <span className="rounded-full bg-primary/10 p-1.5">
+          <Mail className="size-4 text-primary" aria-hidden="true" />
+        </span>
+        <h2 className="text-base font-semibold">{UI_TEXT.public.subscribe}</h2>
       </div>
-    </div>
-  );
 
-  // Mobile sticky footer layout
-  const mobileContent = (
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        Recibe las alertas y comunicados oficiales de SUNAT en tu correo.
+      </p>
+
+      <form onSubmit={handleSubmit} className="mt-4 space-y-2.5">
+        <Input
+          type="email"
+          placeholder={UI_TEXT.public.emailPlaceholder}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          disabled={status === 'loading'}
+          aria-label="Correo electrónico"
+        />
+        <Button type="submit" disabled={status === 'loading'} className="w-full">
+          {status === 'loading' ? 'Enviando...' : UI_TEXT.public.subscribeButton}
+        </Button>
+      </form>
+
+      {status === 'success' && (
+        <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+          <CheckCircle2 className="size-4" aria-hidden="true" />
+          {message}
+        </p>
+      )}
+      {status === 'error' && (
+        <p className="mt-3 text-sm font-medium text-destructive">{message}</p>
+      )}
+
+      <p className="mt-3 text-xs text-muted-foreground">
+        Sin spam. Puedes darte de baja en cualquier momento.
+      </p>
+    </section>
+  );
+}
+
+/**
+ * Fixed bottom bar for small screens, plus the spacer that keeps it from
+ * covering the end of the feed.
+ */
+export function EmailSubscriptionBar() {
+  const { email, setEmail, status, message, handleSubmit } = useSubscription();
+
+  return (
     <>
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-gray-50 dark:bg-gray-800 border-t border-border shadow-lg z-40">
-        <div className="mx-auto max-w-4xl px-4 py-3 sm:px-6">
+      <div className="fixed right-0 bottom-0 left-0 z-40 border-t border-border bg-background/95 shadow-lg backdrop-blur lg:hidden">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
           <form onSubmit={handleSubmit} className="flex gap-2">
-            <input
+            <Input
               type="email"
               placeholder={UI_TEXT.public.emailPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={status === 'loading'}
-              className="flex-1 min-w-0 rounded border border-input bg-gray-50 dark:bg-gray-900 px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+              aria-label="Correo electrónico"
+              className="h-9 min-w-0 flex-1"
             />
-            <button
-              type="submit"
-              disabled={status === 'loading'}
-              className="whitespace-nowrap rounded bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-            >
+            <Button type="submit" size="sm" disabled={status === 'loading'} className="h-9">
               {status === 'loading' ? 'Enviando...' : UI_TEXT.public.subscribeButton}
-            </button>
+            </Button>
           </form>
+
           {status === 'success' && (
-            <p className="text-xs font-medium text-green-600 mt-2">{message}</p>
+            <p className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              {message}
+            </p>
           )}
           {status === 'error' && (
-            <p className="text-xs font-medium text-red-600 mt-2">{message}</p>
+            <p className="mt-2 text-xs font-medium text-destructive">{message}</p>
           )}
         </div>
       </div>
 
-      {/* Add bottom padding on mobile to account for sticky form */}
-      <div className="lg:hidden h-20" />
-    </>
-  );
-
-  return (
-    <>
-      {desktopContent}
-      {mobileContent}
+      {/* Keeps the last card clear of the fixed bar */}
+      <div className="h-20 lg:hidden" />
     </>
   );
 }

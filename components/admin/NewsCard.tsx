@@ -3,7 +3,6 @@ import { getCategoryColorClasses } from '@/lib/utils/badges';
 import { getCategoryLabel } from '@/lib/utils/constants';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Newspaper } from 'lucide-react';
 import Image from 'next/image';
 
 interface NewsCardProps {
@@ -39,7 +38,7 @@ export function NewsCard({ news }: NewsCardProps) {
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-50">{news.title}</h3>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{news.source}</p>
         </div>
-        <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium flex items-center gap-2 ${getCategoryColorClasses(news.category)}`}>
+        <span className={`whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium flex items-center gap-2 ${getCategoryColorClasses(news.category)}`}>
           {getCategoryIcon(news.category)}
           {getCategoryLabel(news.category)}
         </span>
