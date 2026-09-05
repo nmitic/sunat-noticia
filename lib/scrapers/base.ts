@@ -1,6 +1,6 @@
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { db, newsTable, scraperRunTable } from '@/lib/db/drizzle';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 
 export interface ScrapedNewsItem {
   title: string;
@@ -53,6 +53,44 @@ export abstract class BaseScraper {
   }
 
   /**
+   * Which of these source URLs are already stored for this scraper's source.
+   *
+   * Two-stage scrapers call this with the listing URLs so they can skip the
+   * detail fetch for items already held: a steady-state run then costs one
+   * listing request instead of one request per listing row.
+   *
+   * Scoped by source because the same URL could in principle be surfaced by
+   * more than one listing, and the index is on (source, sourceUrl).
+   */
+  protected async findKnownUrls(source: string, urls: string[]): Promise<Set<string>> {
+    const known = new Set<string>();
+    const unique = [...new Set(urls.filter(Boolean))];
+
+    if (unique.length === 0) return known;
+
+    // Chunked to stay well clear of the bind-parameter ceiling on large listings.
+    const CHUNK = 500;
+
+    for (let i = 0; i < unique.length; i += CHUNK) {
+      const rows = await db
+        .select({ sourceUrl: newsTable.sourceUrl })
+        .from(newsTable)
+        .where(
+          and(
+            eq(newsTable.source, source),
+            inArray(newsTable.sourceUrl, unique.slice(i, i + CHUNK))
+          )
+        );
+
+      for (const row of rows) {
+        if (row.sourceUrl) known.add(row.sourceUrl);
+      }
+    }
+
+    return known;
+  }
+
+  /**
    * Execute the scraper with error handling and logging
    */
   async execute(): Promise<{ success: boolean; count: number; newCount: number; duplicateCount: number; error?: string }> {
@@ -94,14 +132,24 @@ export abstract class BaseScraper {
     let duplicateCount = 0;
 
     for (const item of items) {
-      // Check if item already exists (by title + source + date)
+      // sourceUrl is the stable identity when there is one: titles are derived
+      // from page content and shift whenever extraction improves, which would
+      // otherwise make every item look new. Fall back to title + date for rows
+      // with no URL.
+      const identity = item.sourceUrl
+        ? and(
+            eq(newsTable.source, item.source),
+            eq(newsTable.sourceUrl, item.sourceUrl)
+          )
+        : and(
+            eq(newsTable.title, item.title),
+            eq(newsTable.source, item.source),
+            eq(newsTable.originalDate, item.originalDate)
+          );
+
       const [existing] = await db.select()
         .from(newsTable)
-        .where(and(
-          eq(newsTable.title, item.title),
-          eq(newsTable.source, item.source),
-          eq(newsTable.originalDate, item.originalDate)
-        ))
+        .where(identity)
         .limit(1);
 
       if (!existing) {

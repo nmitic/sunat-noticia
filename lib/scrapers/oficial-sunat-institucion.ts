@@ -24,11 +24,21 @@ export class OficialSunatInstitucionScraper extends BaseScraper {
     const listHtml = await this.fetchPageHtml(this.baseUrl);
     const newsMetadata = this.parseNewsList(listHtml);
 
-    console.log(`[${this.source}] Found ${newsMetadata.length} news items to process`);
+    // Skip articles already stored: the listing is stable between runs, and
+    // each entry otherwise costs a full article fetch to produce a duplicate.
+    const known = await this.findKnownUrls(
+      this.source,
+      newsMetadata.map((meta) => meta.sourceUrl)
+    );
+    const fresh = newsMetadata.filter((meta) => !known.has(meta.sourceUrl));
+
+    console.log(
+      `[${this.source}] ${newsMetadata.length} listings, ${fresh.length} new to fetch (${known.size} already stored)`
+    );
 
     const items: ScrapedNewsItem[] = [];
 
-    for (const meta of newsMetadata) {
+    for (const meta of fresh) {
       try {
         const content = await this.fetchArticleContent(meta.sourceUrl);
 

@@ -32,11 +32,22 @@ export class OficialSunatMensajesScraper extends BaseScraper {
     const html = await this.fetchPageHtml();
     const listings = this.parseTable(html);
 
-    console.log(`[${this.source}] Found ${listings.length} listings to process`);
+    // Only unseen comunicados are worth a detail request. The listing carries
+    // ~75 rows that barely change between runs, so without this the scraper
+    // would re-fetch every article on every run to discard nearly all of them.
+    const known = await this.findKnownUrls(
+      this.source,
+      listings.map((listing) => listing.sourceUrl)
+    );
+    const fresh = listings.filter((listing) => !known.has(listing.sourceUrl));
+
+    console.log(
+      `[${this.source}] ${listings.length} listings, ${fresh.length} new to fetch (${known.size} already stored)`
+    );
 
     const items: ScrapedNewsItem[] = [];
 
-    for (const listing of listings) {
+    for (const listing of fresh) {
       items.push(await this.buildItem(listing));
     }
 

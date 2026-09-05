@@ -20,7 +20,21 @@ export class OficialSunatSalaPresaScraper extends BaseScraper {
 
   async scrape(): Promise<ScrapedNewsItem[]> {
     const html = await this.fetchPageHtml();
-    return this.parseTable(html);
+    const items = this.parseTable(html);
+
+    // Single-stage, so this saves no requests — but it keeps the run log
+    // honest about what is actually new and skips pointless insert attempts.
+    const known = await this.findKnownUrls(
+      this.source,
+      items.map((item) => item.sourceUrl ?? '')
+    );
+    const fresh = items.filter((item) => !item.sourceUrl || !known.has(item.sourceUrl));
+
+    console.log(
+      `[${this.source}] ${items.length} listings, ${fresh.length} new (${known.size} already stored)`
+    );
+
+    return fresh;
   }
 
   private async fetchPageHtml(): Promise<string> {

@@ -66,6 +66,9 @@ export const news = pgTable(
       table.originalDate.desc()
     ),
     categoryIdx: index('news_category_idx').on(table.category),
+    // Scrapers look up "which of these listing URLs do we already have?" on
+    // every run, before deciding which detail pages are worth fetching.
+    sourceUrlIdx: index('news_source_url_idx').on(table.source, table.sourceUrl),
   })
 );
 
