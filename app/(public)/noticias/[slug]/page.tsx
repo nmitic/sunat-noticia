@@ -186,7 +186,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
         <div className="flex flex-col gap-8 lg:flex-row">
           <div className="min-w-0 flex-1">
             <Button variant="ghost" size="sm" asChild className="-ml-3 mb-4">
-              <Link href="/">
+              <Link href="/noticias">
                 <ArrowLeft />
                 Volver a las noticias
               </Link>

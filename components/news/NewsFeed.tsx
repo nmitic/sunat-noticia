@@ -6,6 +6,7 @@ import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { NewsCard } from './NewsCard';
 import { NewsFilter, FilterState } from './NewsFilter';
 import { UI_TEXT } from '@/lib/utils/constants';
+import type { StructuredOutage } from '@/lib/outage/types';
 import { SearchX } from 'lucide-react';
 
 interface NewsItem {
@@ -18,6 +19,9 @@ interface NewsItem {
   flags: NewsFlag[];
   originalDate: Date;
   publishedAt: Date | null;
+  /** Present on reviewed outage notices; NewsCard renders it in place of the
+   *  prose. Declared here so paginated pages keep it, not just the first. */
+  structuredData?: StructuredOutage | null;
 }
 
 interface NewsFeedProps {

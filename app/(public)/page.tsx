@@ -1,116 +1,99 @@
-import { db, newsTable } from '@/lib/db/drizzle';
-import { NewsFeed } from '@/components/news/NewsFeed';
-import { NewsCategory, NewsFlag } from '@/lib/db/schema';
-import { eq, desc, and, or, sql } from 'drizzle-orm';
+import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import {
   EmailSubscriptionBar,
   EmailSubscriptionCard,
 } from '@/components/layout/EmailSubscriptionForm';
-import { SeverityLegend } from '@/components/news/SeverityLegend';
 import { PerunioAd } from '@/components/ads/PerunioAd';
-import { getServerSession } from 'next-auth';
+import { StatusHero } from '@/components/status/StatusHero';
+import { AffectedServices } from '@/components/status/AffectedServices';
+import { UpcomingMaintenance } from '@/components/status/UpcomingMaintenance';
+import { IncidentHistory } from '@/components/status/IncidentHistory';
+import { LatestNewsStrip } from '@/components/status/LatestNewsStrip';
 import { authOptions } from '@/lib/auth/config';
-import type { StructuredOutage } from '@/lib/outage/types';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { RadioTower } from 'lucide-react';
+import { queryPublishedNews, type NewsRow } from '@/lib/api/news-query';
+import {
+  queryLastNewsAt,
+  queryLatestNonOutageNews,
+  queryOutageCandidates,
+} from '@/lib/api/status-query';
+import { computeStatus, partitionIncidents, type SiteStatus } from '@/lib/outage/status';
+import { UI_TEXT } from '@/lib/utils/constants';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'SUNAT Noticias - Agregador de Noticias',
-  description: 'Últimas noticias sobre SUNAT de fuentes oficiales',
+  title: '¿SUNAT está caído? Estado de los servicios en tiempo real',
+  description:
+    'Consulta si los sistemas de SUNAT están caídos ahora: caídas, intermitencias y mantenimientos reportados en los comunicados oficiales, con los servicios afectados.',
+  alternates: { canonical: '/' },
 };
-
-interface NewsItem {
-  id: string;
-  title: string;
-  content: string;
-  source: string;
-  sourceUrl: string | null;
-  category: NewsCategory;
-  flags: NewsFlag[];
-  originalDate: Date;
-  publishedAt: Date | null;
-  structuredData: StructuredOutage | null;
-}
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function HomePage({ searchParams }: PageProps) {
-  // Only decides whether the header offers a link back to the panel — the feed
-  // itself is identical for every visitor, admin or not.
+export default async function StatusPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+
+  // The filters belonged to the feed, which now lives at /noticias. next.config
+  // catches document requests; this catches client-side navigations, which do
+  // not re-run config redirects. redirect() throws, so it must stay outside the
+  // try/catch below.
+  const flagsParam = typeof params.flags === 'string' ? params.flags : undefined;
+  const categoryParam = typeof params.category === 'string' ? params.category : undefined;
+
+  if (flagsParam || categoryParam) {
+    const query = new URLSearchParams();
+    if (categoryParam) query.set('category', categoryParam);
+    if (flagsParam) query.set('flags', flagsParam);
+
+    redirect(`/noticias?${query.toString()}`);
+  }
+
   const session = await getServerSession(authOptions);
   const isAdmin = !!session;
 
-  // Await and extract search params
-  const params = await searchParams;
-  const categoryParam = params.category as string | undefined;
-  const flagsParam = params.flags as string | undefined;
+  // One clock for the whole page: the hero and the history must not disagree
+  // about whether an incident is still running.
+  const now = new Date();
 
-  // Create a key for NewsFeed based on filters to force remount when filters change
-  const feedKey = `${categoryParam || 'all'}-${flagsParam || 'none'}`;
-
-  // Fetch published news with filters
-  let news: NewsItem[] = [];
+  let status: SiteStatus | null = null;
+  let upcoming: NewsRow[] = [];
+  let incidents: NewsRow[] = [];
+  let latest: NewsRow[] = [];
+  let lastNewsAt: Date | null = null;
+  let unreviewedCount = 0;
   let dbError = false;
 
   try {
-    // Build query conditions
-    const conditions = [eq(newsTable.published, true)];
+    // Concurrent, because four serial round trips would show up in TTFB on a
+    // force-dynamic page. The pool caps at 3, so one of these queues briefly.
+    const [candidates, incidentRows, latestRows, lastAt] = await Promise.all([
+      queryOutageCandidates(),
+      // Fetched wider than the five shown: announced-but-not-started windows are
+      // split off below, and they must not eat the history's slots.
+      queryPublishedNews({ flags: 'CAIDA_SISTEMA', limit: 15 }),
+      queryLatestNonOutageNews(5),
+      queryLastNewsAt(),
+    ]);
 
-    // Add category filter (single category)
-    if (categoryParam) {
-      const category = categoryParam as NewsCategory;
-      conditions.push(eq(newsTable.category, category));
-    }
+    status = computeStatus(candidates.items, now);
+    unreviewedCount = candidates.unreviewedCount;
 
-    // Add flags filter (array of flags - item must have at least one)
-    if (flagsParam) {
-      const flags = flagsParam.split(',') as NewsFlag[];
-      if (flags.length > 0) {
-        // Use PostgreSQL array overlap operator: flags && ARRAY['flag1', 'flag2']
-        const flagConditions = flags.map(flag =>
-          sql`${newsTable.flags} @> ARRAY[${flag}]::text[]`
-        );
-        conditions.push(or(...flagConditions)!);
-      }
-    }
+    const partitioned = partitionIncidents(incidentRows.news, now);
+    upcoming = partitioned.upcoming.slice(0, 5);
+    incidents = partitioned.history.slice(0, 5);
 
-    const newsRows = await db.select({
-      id: newsTable.id,
-      title: newsTable.title,
-      content: newsTable.content,
-      source: newsTable.source,
-      sourceUrl: newsTable.sourceUrl,
-      category: newsTable.category,
-      flags: newsTable.flags,
-      originalDate: newsTable.originalDate,
-      publishedAt: newsTable.publishedAt,
-      structuredData: newsTable.structuredData,
-    }).from(newsTable)
-      .where(and(...conditions))
-      .orderBy(desc(newsTable.originalDate))
-      .limit(50);
-
-    news = newsRows.map(row => ({
-      ...row,
-      flags: (row.flags as NewsFlag[]) || [],
-    }));
+    latest = latestRows;
+    lastNewsAt = lastAt;
   } catch (error) {
-    console.error('Database error:', error);
+    console.error('Status query error:', error);
     dbError = true;
   }
-
-  // Freshness indicator, driven by the newest item actually on the page.
-  const lastUpdated =
-    news.length > 0
-      ? formatDistanceToNow(new Date(news[0].originalDate), { addSuffix: true, locale: es })
-      : null;
 
   return (
     <>
@@ -118,42 +101,32 @@ export default async function HomePage({ searchParams }: PageProps) {
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8 lg:flex-row">
-          {/* Main content area */}
           <div className="min-w-0 flex-1">
-            <div className="space-y-6">
-              <header className="space-y-3">
-                <h1 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-                  Noticias de SUNAT
-                </h1>
-                <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-                  Comunicados, avisos y alertas de fuentes oficiales de SUNAT, actualizados
-                  automáticamente.
-                </p>
+            {dbError || !status ? (
+              <div className="rounded-lg border border-destructive bg-destructive/5 p-8 text-center">
+                <h1 className="mb-2 text-lg font-semibold text-destructive">Error</h1>
+                <p className="text-foreground/80">{UI_TEXT.status.error}</p>
+              </div>
+            ) : (
+              <div className="space-y-10">
+                <StatusHero
+                  status={status}
+                  lastNewsAt={lastNewsAt}
+                  unreviewedCount={unreviewedCount}
+                />
 
-                {lastUpdated && (
-                  <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <RadioTower className="size-3.5" aria-hidden="true" />
-                    Última noticia {lastUpdated}
-                  </p>
-                )}
+                <AffectedServices services={status.affectedServices} />
 
-                <SeverityLegend />
-              </header>
+                <UpcomingMaintenance upcoming={upcoming} />
 
-              {dbError ? (
-                <div className="rounded-lg border border-destructive bg-destructive/5 p-8 text-center">
-                  <h2 className="mb-2 text-lg font-semibold text-destructive">Error</h2>
-                  <p className="text-foreground/80">
-                    Ocurrió un error al cargar las noticias. Por favor, inténtalo más tarde.
-                  </p>
-                </div>
-              ) : (
-                <NewsFeed key={feedKey} initialNews={news} />
-              )}
-            </div>
+                <IncidentHistory incidents={incidents} now={now} />
 
-            {/* Below lg the rail collapses, so the ad follows the feed instead
-                of disappearing entirely. */}
+                <LatestNewsStrip news={latest} />
+              </div>
+            )}
+
+            {/* Below lg the rail collapses, so the ad follows the page content
+                instead of disappearing entirely. */}
             <div className="mt-10 lg:hidden">
               <PerunioAd slug="plataforma" />
             </div>

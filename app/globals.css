@@ -54,6 +54,12 @@
   --sev-neutral: #475569;
   --sev-neutral-bg: #f8fafc;
   --sev-neutral-fg: #334155;
+  /* "Nothing reported" on the status page. The ramp above has no green because
+     nothing in a news feed was ever good news; reusing --sev-neutral would make
+     an all-clear look like a Sala de Prensa chip. */
+  --sev-ok: #059669;
+  --sev-ok-bg: #ecfdf5;
+  --sev-ok-fg: #065f46;
 
   --font-sans: ui-sans-serif,
     system-ui,
@@ -153,6 +159,9 @@
     --sev-neutral: #94a3b8;
     --sev-neutral-bg: #1e293b;
     --sev-neutral-fg: #cbd5e1;
+    --sev-ok: #34d399;
+    --sev-ok-bg: #052e2b;
+    --sev-ok-fg: #6ee7b7;
 
     --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
@@ -218,6 +227,9 @@
   --color-sev-neutral: var(--sev-neutral);
   --color-sev-neutral-bg: var(--sev-neutral-bg);
   --color-sev-neutral-fg: var(--sev-neutral-fg);
+  --color-sev-ok: var(--sev-ok);
+  --color-sev-ok-bg: var(--sev-ok-bg);
+  --color-sev-ok-fg: var(--sev-ok-fg);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);

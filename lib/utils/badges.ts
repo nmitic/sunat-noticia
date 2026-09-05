@@ -1,4 +1,5 @@
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
+import type { StatusLevel } from '@/lib/outage/status';
 
 /**
  * Visual severity levels. These map onto the --sev-* token ramp in globals.css,
@@ -102,6 +103,53 @@ export function getFlagDotClasses(flag: NewsFlag): string {
  */
 export function getFlagColorClasses(flag: NewsFlag): string {
   return getFlagChipClasses(flag);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Status page                                                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Status level → the same severity ramp the feed uses, so a red hero and an
+ * URGENTE chip agree about what red means. Only `operativo` reaches for
+ * --sev-ok, which exists for exactly this one state.
+ */
+const STATUS_BAND_CLASSES: Record<StatusLevel, string> = {
+  indisponible: 'bg-sev-critical-bg text-sev-critical-fg',
+  degradado: 'bg-sev-high-bg text-sev-high-fg',
+  incidencia: 'bg-sev-outage-bg text-sev-outage-fg',
+  mantenimiento: 'bg-sev-info-bg text-sev-info-fg',
+  operativo: 'bg-sev-ok-bg text-sev-ok-fg',
+};
+
+const STATUS_ACCENT_CLASSES: Record<StatusLevel, string> = {
+  indisponible: 'border-l-sev-critical',
+  degradado: 'border-l-sev-high',
+  incidencia: 'border-l-sev-outage',
+  mantenimiento: 'border-l-sev-info',
+  operativo: 'border-l-sev-ok',
+};
+
+const STATUS_DOT_CLASSES: Record<StatusLevel, string> = {
+  indisponible: 'bg-sev-critical',
+  degradado: 'bg-sev-high',
+  incidencia: 'bg-sev-outage',
+  mantenimiento: 'bg-sev-info',
+  operativo: 'bg-sev-ok',
+};
+
+/** Tint and text for the hero's status band. */
+export function getStatusBandClasses(level: StatusLevel): string {
+  return STATUS_BAND_CLASSES[level] ?? STATUS_BAND_CLASSES.operativo;
+}
+
+/** Left accent bar, matching the treatment on news cards. */
+export function getStatusAccentClasses(level: StatusLevel): string {
+  return STATUS_ACCENT_CLASSES[level] ?? STATUS_ACCENT_CLASSES.operativo;
+}
+
+export function getStatusDotClasses(level: StatusLevel): string {
+  return STATUS_DOT_CLASSES[level] ?? STATUS_DOT_CLASSES.operativo;
 }
 
 /**

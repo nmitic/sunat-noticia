@@ -25,13 +25,19 @@ export function Header({ isAdmin = false }: HeaderProps) {
             </span>
           </Link>
 
-          {isAdmin && (
-            <nav className="flex items-center">
+          {/* The logo goes to the status page, so the feed needs its own way in
+              — otherwise a visitor arriving on an article has no route to it. */}
+          <nav className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/noticias">Noticias</Link>
+            </Button>
+
+            {isAdmin && (
               <Button variant="outline" size="sm" asChild>
                 <Link href="/admin/noticias">Panel Admin</Link>
               </Button>
-            </nav>
-          )}
+            )}
+          </nav>
         </div>
       </div>
     </header>
