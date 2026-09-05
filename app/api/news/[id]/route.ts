@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { db, newsTable } from '@/lib/db/drizzle';
-import { NewsFlag } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function PATCH(

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { NewsCard } from './NewsCard';
@@ -51,7 +51,7 @@ export function NewsFeed({ initialNews, embeded = false }: NewsFeedProps) {
   const observerTarget = useRef<HTMLDivElement>(null);
 
   // Build URL with filter parameters (read from URL)
-  const buildApiUrl = (cursorValue: string | null) => {
+  const buildApiUrl = useCallback((cursorValue: string | null) => {
     const params = new URLSearchParams();
     params.set('limit', '50');
 
@@ -74,10 +74,10 @@ export function NewsFeed({ initialNews, embeded = false }: NewsFeedProps) {
     }
 
     return `/api/news?${params.toString()}`;
-  };
+  }, [searchParams]);
 
   // Fetch more news from API (for infinite scroll)
-  const fetchMoreNews = async () => {
+  const fetchMoreNews = useCallback(async () => {
     if (!hasMore || !cursor || loading) return;
 
     setLoading(true);
@@ -95,7 +95,7 @@ export function NewsFeed({ initialNews, embeded = false }: NewsFeedProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [hasMore, cursor, loading, buildApiUrl]);
 
   // Set up Intersection Observer for infinite scroll
   useEffect(() => {
@@ -113,7 +113,7 @@ export function NewsFeed({ initialNews, embeded = false }: NewsFeedProps) {
     }
 
     return () => observer.disconnect();
-  }, [hasMore, loading, cursor]);
+  }, [fetchMoreNews, hasMore, loading]);
 
   return (
     <div className="space-y-4">

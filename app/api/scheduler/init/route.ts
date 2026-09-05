@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { startScheduler } from '@/lib/scrapers/scheduler';
 
 // Global flag to prevent multiple scheduler starts
 let schedulerStarted = false;
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     if (schedulerStarted) {
       return NextResponse.json(

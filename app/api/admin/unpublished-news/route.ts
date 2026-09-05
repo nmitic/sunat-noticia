@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { db, newsTable } from '@/lib/db/drizzle';
+import type { NewsFlag } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Check authentication (admin only)
     const session = await getServerSession(authOptions);
@@ -33,7 +34,8 @@ export async function GET(request: NextRequest) {
 
     const news = newsRows.map(row => ({
       ...row,
-      flags: (row.flags as any[]) || [],
+      // Stored as text[]; the column only ever holds NewsFlag values.
+      flags: (row.flags as NewsFlag[]) || [],
     }));
 
     return NextResponse.json({ news }, { status: 200 });

@@ -30,22 +30,28 @@ export function ScraperRunsLog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRuns();
-  }, []);
+    let cancelled = false;
 
-  async function fetchRuns() {
-    try {
-      const response = await fetch('/api/admin/scraper-runs');
-      if (response.ok) {
-        const data = await response.json();
-        setRuns(data.runs || []);
+    async function fetchRuns() {
+      try {
+        const response = await fetch('/api/admin/scraper-runs');
+        if (response.ok) {
+          const data = await response.json();
+          if (!cancelled) setRuns(data.runs || []);
+        }
+      } catch (error) {
+        console.error('Error fetching scraper runs:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching scraper runs:', error);
-    } finally {
-      setLoading(false);
     }
-  }
+
+    fetchRuns();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="rounded-lg border border-border bg-card dark:bg-gray-800 p-6">

@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { db, newsTable } from '@/lib/db/drizzle';
 import { inArray } from 'drizzle-orm';
-import { NewsFlag } from '@/lib/db/schema';
 
 export async function POST(request: NextRequest) {
   try {

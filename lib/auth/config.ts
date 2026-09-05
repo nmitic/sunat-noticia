@@ -13,7 +13,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email', placeholder: 'admin@example.com' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Invalid credentials');
         }
@@ -47,7 +47,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
-        (session.user as any).id = token.sub || '';
+        session.user.id = token.sub || '';
       }
       return session;
     },

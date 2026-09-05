@@ -28,7 +28,7 @@ export default function LoginPage() {
       } else if (result?.ok) {
         router.push('/admin/noticias');
       }
-    } catch (err) {
+    } catch {
       setError('Error al iniciar sesión. Intenta de nuevo.');
     } finally {
       setLoading(false);

@@ -48,7 +48,7 @@ export abstract class BaseScraper {
   /**
    * Lifecycle hook: run after successful scraping
    */
-  protected async afterScrape(items: ScrapedNewsItem[]): Promise<void> {
+  protected async afterScrape(_items: ScrapedNewsItem[]): Promise<void> {
     // Override in subclasses if needed
   }
 
