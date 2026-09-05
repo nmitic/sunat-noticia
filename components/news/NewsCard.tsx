@@ -182,7 +182,7 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
       </div>
 
       {/* Headline + excerpt */}
-      <div className="space-y-2 px-5 pb-4">
+      <div className="space-y-2 px-5 p-4">
         {/* Not a link: the full text is on the card now, and the action bar
             below carries the deliberate route out to the official source. */}
         <h3 className="line-clamp-3 text-lg leading-snug font-semibold text-balance">
