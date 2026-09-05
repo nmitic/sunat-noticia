@@ -6,12 +6,9 @@ import { Select } from '@/components/ui/select';
 
 const SCRAPERS = [
   { name: 'all', label: 'Todos' },
-  { name: 'facebook-sunat', label: 'Social Media (Facebook)' },
   { name: 'oficial-sources-mensaje', label: 'Oficial Mensajes' },
   { name: 'oficial-sources-sala', label: 'Oficial Salapresa' },
   { name: 'oficial-sources-institucion', label: 'Oficial Institucion' },
-  { name: 'noticias-la-republica', label: 'Noticias La República' },
-  { name: 'noticias-gestion', label: 'Noticias Gestión' },
 ];
 
 interface ScraperControlsProps {
@@ -20,7 +17,7 @@ interface ScraperControlsProps {
 }
 
 export function ScraperControls({ onScraperComplete, isRefetching }: ScraperControlsProps) {
-  const [selected, setSelected] = useState('facebook-sunat');
+  const [selected, setSelected] = useState('all');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);

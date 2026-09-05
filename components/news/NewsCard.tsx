@@ -4,10 +4,10 @@ import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getCategoryColorClasses, getFlagColorClasses } from '@/lib/utils/badges';
-import { getCategoryLabel, getFlagLabel, UI_TEXT } from '@/lib/utils/constants';
+import { getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Newspaper, Trash2, EyeOff, Radio } from 'lucide-react';
+import { Trash2, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -23,7 +23,6 @@ interface NewsCardProps {
     flags?: NewsFlag[];
     originalDate: Date;
     publishedAt?: Date | null;
-    adds?: boolean;
   };
   isAdmin?: boolean;
 }
@@ -32,10 +31,6 @@ const getCategoryIcon = (category: NewsCategory) => {
   switch (category) {
     case 'OFICIAL':
       return <Image src="/sunat.svg" alt="SUNAT" width={16} height={16} />;
-    case 'REDES_SOCIALES':
-      return <Image src="/facebook.svg" alt="Facebook" width={16} height={16} />;
-    case 'NOTICIAS':
-      return <Newspaper className="w-4 h-4" />;
   }
 };
 
@@ -120,17 +115,10 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
             </CardTitle>
             <p className="text-sm text-gray-600">{news.source}</p>
           </div>
-          {news.adds ? (
-            <Badge variant="outline" className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-white font-bold shadow-lg border-2 border-yellow-300">
-              <Radio className="w-4 h-4" />
-              Anuncio
-            </Badge>
-          ) : (
-            <Badge variant="outline" className={`flex items-center gap-2 ${getCategoryColorClasses(news.category)}`}>
-              {getCategoryIcon(news.category)}
-              {getCategoryLabel(news.category)}
-            </Badge>
-          )}
+          <Badge variant="outline" className={`flex items-center gap-2 ${getCategoryColorClasses(news.category)}`}>
+            {getCategoryIcon(news.category)}
+            {getCategoryLabel(news.category)}
+          </Badge>
         </div>
       </CardHeader>
 
@@ -163,7 +151,7 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
           )}
         </div>
 
-        {isAdmin && news.id && !news.adds && (
+        {isAdmin && news.id && (
           <div className="flex items-center gap-2">
             <button
               onClick={handleUnpublish}

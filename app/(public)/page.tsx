@@ -7,13 +7,12 @@ import { Footer } from '@/components/layout/Footer';
 import { EmailSubscriptionForm } from '@/components/layout/EmailSubscriptionForm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
-import { injectAds } from '@/lib/ads';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'SUNAT Noticias - Agregador de Noticias',
-  description: 'Últimas noticias sobre SUNAT de fuentes oficiales y medios de comunicación',
+  description: 'Últimas noticias sobre SUNAT de fuentes oficiales',
 };
 
 interface NewsItem {
@@ -26,7 +25,6 @@ interface NewsItem {
   flags: NewsFlag[];
   originalDate: Date;
   publishedAt: Date | null;
-  adds?: boolean;
 }
 
 interface PageProps {
@@ -91,10 +89,6 @@ export default async function HomePage({ searchParams }: PageProps) {
       ...row,
       flags: (row.flags as NewsFlag[]) || [],
     }));
-
-    // Inject ads (public route - ads enabled)
-    const { items: newsWithAds } = injectAds({ items: news });
-    news = newsWithAds as NewsItem[];
   } catch (error) {
     console.error('Database error:', error);
     dbError = true;

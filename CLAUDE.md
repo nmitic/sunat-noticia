@@ -4,13 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**SUNAT News Aggregation Platform** - A Next.js 16 full-stack application that aggregates news from multiple sources (official SUNAT websites, Facebook, news outlets), with admin approval workflow, real-time SSE updates, and public email subscriptions.
+**SUNAT News Aggregation Platform** - A Next.js 16 full-stack application that aggregates news from official SUNAT sources (`sunat.gob.pe` and `gob.pe`), with admin approval workflow, real-time SSE updates, and public email subscriptions.
+
+Only official sources are scraped. Facebook and third-party news outlets (La República, Gestión) were removed, along with the in-feed ads system.
 
 ## Technology Stack
 
 - **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS 4
 - **Backend**: Node.js, Next.js API Routes
-- **Database**: PostgreSQL + Drizzle ORM 0.44
+- **Database**: PostgreSQL + Drizzle ORM 0.45 (drizzle-kit 0.31 — keep these in step; an older drizzle-kit breaks `drizzle.config.ts`)
 - **Authentication**: NextAuth.js 4 (Credentials provider)
 - **Real-time**: Server-Sent Events (SSE)
 - **Task Scheduling**: node-cron
@@ -23,11 +25,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`npm run build`** - Create optimized production build
 - **`npm run start`** - Start production server (requires `npm run build` first)
 - **`npm run lint`** - Run ESLint code quality checks
-- **`npm run db:generate`** - Generate Drizzle migrations from schema
-- **`npm run db:migrate`** - Run Drizzle migrations
-- **`npm run db:push`** - Push Drizzle schema to database
-- **`npm run db:seed`** - Seed admin user from environment variables
-- **`npm run db:studio`** - Open Drizzle Studio GUI (http://localhost:5555)
+Database scripts are environment-scoped — there is no bare `db:generate`/`db:migrate`. Use the `db:local:*` variants (loads `.env.local`) or `db:prod:*` (loads `.env`):
+
+- **`npm run db:local:generate`** / **`db:prod:generate`** - Generate Drizzle migrations from schema
+- **`npm run db:local:migrate`** / **`db:prod:migrate`** - Run Drizzle migrations
+- **`npm run db:local:push`** / **`db:prod:push`** - Push Drizzle schema to database (the workflow this project actually uses)
+- **`npm run db:local:seed`** / **`db:prod:seed`** - Seed admin user from environment variables
+- **`npm run db:local:studio`** / **`db:prod:studio`** - Open Drizzle Studio GUI
 
 ## Complete Project Structure
 
@@ -54,7 +58,7 @@ sunat-noticias/
 │   │   └── scheduler/
 │   │       ├── init/route.ts         # POST initialize scheduler
 │   │       └── run/route.ts          # POST manual scraper trigger
-│   ├── layout.tsx                    # Root layout with SchedulerInitializer
+│   ├── layout.tsx                    # Root layout
 │   └── globals.css                   # Global styles
 ├── components/
 │   ├── news/
@@ -70,7 +74,6 @@ sunat-noticias/
 │   │   ├── Header.tsx                # Public header
 │   │   ├── Footer.tsx                # Public footer
 │   │   └── EmailSignup.tsx           # Email subscription form
-│   └── SchedulerInitializer.tsx      # Initializes scraper scheduler on app load
 ├── lib/
 │   ├── auth/
 │   │   └── config.ts                 # NextAuth configuration
@@ -78,17 +81,17 @@ sunat-noticias/
 │   │   ├── schema.ts                 # Drizzle schema definitions
 │   │   └── drizzle.ts                # Drizzle client and connection pool
 │   ├── scrapers/
-│   │   ├── base.ts                   # BaseScraper abstract class
-│   │   ├── facebook.ts               # Facebook Graph API scraper (active)
-│   │   ├── oficial-placeholder.ts    # Placeholder for official sources
-│   │   ├── noticias-placeholder.ts   # Placeholder for news outlets
-│   │   └── scheduler.ts              # cron-based scheduler
+│   │   ├── base.ts                        # BaseScraper abstract class
+│   │   ├── oficial-sunat-mensajes.ts      # sunat.gob.pe/mensajes (ISO-8859-1)
+│   │   ├── oficial-sunat-salapresa.ts     # sunat.gob.pe/salaprensa (sets SALA_PRENSA flag)
+│   │   ├── oficial-sunat-institucion.ts   # gob.pe/institucion/sunat/noticias (two-stage)
+│   │   └── scheduler.ts                   # cron-based scheduler
 │   ├── sse/
 │   │   └── broadcast.ts              # SSE broadcast utility
 │   └── utils/
 │       ├── constants.ts              # Spanish UI text constants
 │       └── badges.ts                 # Badge/color utilities
-├── prisma/
+├── prisma/                           # legacy dir name; Prisma is NOT used
 │   └── seed.ts                       # Admin user seeding script (uses Drizzle)
 ├── drizzle/
 │   └── *.sql                         # Generated Drizzle migrations
@@ -99,7 +102,6 @@ sunat-noticias/
 ├── .gitignore
 ├── package.json                      # Dependencies and scripts
 ├── tsconfig.json                     # TypeScript configuration
-├── tailwind.config.ts                # Tailwind configuration
 ├── next.config.ts                    # Next.js configuration
 ├── eslint.config.mjs                 # ESLint configuration
 ├── CLAUDE.md                         # This file
@@ -119,11 +121,10 @@ sunat-noticias/
 ### Key Components
 
 #### Scraper System
-- **Base Pattern**: `lib/scrapers/base.ts` - Abstract class with error handling, logging, deduplication
-- **Facebook Scraper**: `lib/scrapers/facebook.ts` - Fetches SUNAT posts via Meta Graph API
-- **Placeholders**: Prepared interfaces for future scrapers (oficial, noticias outlets)
-- **Scheduler**: `lib/scrapers/scheduler.ts` - Uses node-cron for automatic execution
-- **Execution**: Triggered on app boot via `SchedulerInitializer` → `/api/scheduler/init`
+- **Base Pattern**: `lib/scrapers/base.ts` - Abstract class with error handling, logging, deduplication. Expose config via the public `settings` getter (do not reach for the `protected config`).
+- **Official Scrapers**: three, all `OFICIAL` category, registered in `lib/scrapers/scheduler.ts` on a 6-hour cron — `oficial-sources-mensaje`, `oficial-sources-sala`, `oficial-sources-institucion`.
+- **Deduplication**: `base.ts` keys on `title + source + originalDate`. Note `oficial-sunat-mensajes.ts` hardcodes the title `'COMUNICADO'`, so two comunicados on the same date collapse into one.
+- **Execution**: ⚠️ `/api/scheduler/init` exists but **nothing calls it** — the `SchedulerInitializer` component was removed and is not in the root layout. In practice scrapers run only via the admin panel's manual trigger (`POST /api/scheduler/run`). Wire up the initializer if automatic scheduling is wanted.
 
 #### Database Models
 - **News**: Title, content, source, category, flags, published status, timestamps
@@ -156,7 +157,7 @@ sunat-noticias/
 - Main feed showing all published news (newest first)
 - Real-time updates via SSE (no page refresh)
 - "Nuevo" badge on recently published items (auto-disappears after 1 hour)
-- Category badges (Oficial, Redes Sociales, Noticias)
+- Category badge (Oficial — the only category)
 - Flag badges with color coding
 - Email signup form (persistence only, no delivery)
 
@@ -167,7 +168,7 @@ sunat-noticias/
 
 ### Spanish Localization
 All UI text in Spanish (Spain variant):
-- Categories: Oficial, Redes Sociales, Noticias
+- Category: Oficial
 - Flags: Importante, Actualización, Urgente, Caída de Sistema
 - Buttons: Publicar, Rechazar, Suscribirse, etc.
 - date-fns using `es` locale for relative dates
@@ -180,13 +181,13 @@ All UI text in Spanish (Spain variant):
 createdb sunat_noticias
 
 # Add to .env.local
-DATABASE_URL="postgresql://localhost:5432/sunat_noticias"
+POSTGRES_URL="postgresql://localhost:5432/sunat_noticias"
 
 # Run migrations
-npm run db:push
+npm run db:local:push
 
 # Seed admin user
-npm run db:seed
+npm run db:local:seed
 ```
 
 ### Cloud Services
@@ -200,15 +201,12 @@ See [SETUP.md](./SETUP.md) for detailed instructions.
 ## Environment Variables Required
 
 ```
-# Database
-DATABASE_URL=postgresql://...
+# Database — note the name is POSTGRES_URL, not DATABASE_URL
+POSTGRES_URL=postgresql://...
 
 # NextAuth
 NEXTAUTH_SECRET=<generate: openssl rand -base64 32>
 NEXTAUTH_URL=http://localhost:3000
-
-# Facebook API
-FACEBOOK_ACCESS_TOKEN=<get from Facebook Developer Console>
 
 # Admin User Seeding
 ADMIN_EMAIL=admin@example.com
@@ -232,8 +230,8 @@ Password: SecurePassword123 (from .env.local ADMIN_PASSWORD)
 
 ### Test Scraper
 1. Login to admin panel
-2. Add unpublished news via Facebook scraper automatically (every 2 hours)
-3. Or manually trigger: `POST /api/scheduler/run` with `{"scraperName": "facebook-sunat"}`
+2. Trigger a scraper from the admin panel, or `POST /api/scheduler/run` with
+   `{"scraperName": "oficial-sources-mensaje"}` (or `oficial-sources-sala` / `oficial-sources-institucion`)
 
 ### Publish News
 1. Go to `/admin/noticias`
@@ -250,12 +248,11 @@ Password: SecurePassword123 (from .env.local ADMIN_PASSWORD)
 ### Test Email Subscription
 1. On `/`, scroll to footer
 2. Enter email and click "Suscribirse"
-3. Check database: `prisma studio` → EmailSubscription table
+3. Check database: `npm run db:local:studio` → EmailSubscription table
 
 ### View Database
 ```bash
-npx prisma studio
-# Opens http://localhost:5555
+npm run db:local:studio
 # Browse all tables, edit data
 ```
 
@@ -268,7 +265,6 @@ npx prisma studio
 | `drizzle.config.ts` | Drizzle Kit configuration |
 | `lib/auth/config.ts` | NextAuth configuration, admin authentication |
 | `lib/scrapers/base.ts` | Abstract scraper class, common patterns |
-| `lib/scrapers/facebook.ts` | Facebook data collection logic |
 | `lib/sse/broadcast.ts` | Real-time update broadcasting |
 | `components/news/NewsFeed.tsx` | Public feed with SSE listener |
 | `app/admin/noticias/page.tsx` | Admin review queue |
@@ -352,13 +348,13 @@ npm run build
 ### Common Issues
 
 **"Database connection error"**
-- Check DATABASE_URL is correct
+- Check POSTGRES_URL is correct
 - Ensure PostgreSQL is running
 - Verify network connectivity
 
 **"Admin login fails"**
 - Verify ADMIN_EMAIL and ADMIN_PASSWORD in .env.local
-- Check database was seeded: `npm run db:seed`
+- Check database was seeded: `npm run db:local:seed`
 - Clear browser cookies
 
 **"Scraper returns 0 items"**
@@ -372,3 +368,13 @@ npm run build
 - Verify no proxy/firewall blocking streaming
 
 See [SETUP.md](./SETUP.md) Troubleshooting section for more help.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

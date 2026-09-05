@@ -6,12 +6,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const SCRAPER_LABELS: Record<string, string> = {
-  'facebook-sunat': 'Facebook',
   'oficial-sources-mensaje': 'Mensaje',
   'oficial-sources-sala': 'Sala de Prensa',
   'oficial-sources-institucion': 'Institucional',
-  'noticias-la-republica': 'La República',
-  'noticias-gestion': 'Gestión',
 };
 
 function getScraperLabel(name: string): string {

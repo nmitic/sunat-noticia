@@ -17,7 +17,6 @@ interface NewsItem {
   flags: NewsFlag[];
   originalDate: Date;
   publishedAt: Date | null;
-  adds?: boolean;
 }
 
 interface NewsFeedProps {

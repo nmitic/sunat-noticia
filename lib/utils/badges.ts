@@ -21,8 +21,6 @@ export function getFlagColorClasses(flag: NewsFlag): string {
 export function getCategoryColorClasses(category: NewsCategory): string {
   const colors: Record<NewsCategory, string> = {
     OFICIAL: 'bg-green-100 text-green-800 border border-green-300',
-    REDES_SOCIALES: 'bg-blue-100 text-blue-800 border border-blue-300',
-    NOTICIAS: 'bg-yellow-100 text-yellow-800 border border-yellow-300',
   };
 
   return colors[category] || 'bg-gray-100 text-gray-800 border border-gray-300';

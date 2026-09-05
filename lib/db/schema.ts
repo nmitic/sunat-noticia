@@ -12,11 +12,7 @@ import { sql } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 
 // Enums
-export const newsCategoryEnum = pgEnum('NewsCategory', [
-  'OFICIAL',
-  'REDES_SOCIALES',
-  'NOTICIAS',
-]);
+export const newsCategoryEnum = pgEnum('NewsCategory', ['OFICIAL']);
 export const newsFlagEnum = pgEnum('NewsFlag', [
   'IMPORTANTE',
   'ACTUALIZACION',
@@ -26,7 +22,7 @@ export const newsFlagEnum = pgEnum('NewsFlag', [
 ]);
 
 // Export types for application use
-export type NewsCategory = 'OFICIAL' | 'REDES_SOCIALES' | 'NOTICIAS';
+export type NewsCategory = 'OFICIAL';
 export type NewsFlag =
   | 'IMPORTANTE'
   | 'ACTUALIZACION'

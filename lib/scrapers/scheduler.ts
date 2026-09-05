@@ -1,23 +1,14 @@
 import * as cron from 'node-cron';
-import { BaseScraper, ScraperConfig } from './base';
-import { FacebookScraper } from './facebook';
+import { BaseScraper } from './base';
 import { OficialSunatMensajesScraper } from './oficial-sunat-mensajes';
 import { OficialSunatSalaPresaScraper } from './oficial-sunat-salapresa';
 import { OficialSunatInstitucionScraper } from './oficial-sunat-institucion';
-import { NoticiasLaRepublicaScraper } from './noticias-la-republica';
-import { NoticiasGestionScraper } from './noticias-gestion';
 import { NewsCategory } from '@/lib/db/schema';
 
 /**
  * Global list of all scrapers
  */
 const scrapers: BaseScraper[] = [
-  new FacebookScraper({
-    name: 'facebook-sunat',
-    category: 'REDES_SOCIALES' as NewsCategory,
-    enabled: true,
-    cronSchedule: '0 */2 * * *', // Every 2 hours
-  }),
   new OficialSunatMensajesScraper({
     name: 'oficial-sources-mensaje',
     category: 'OFICIAL' as NewsCategory,
@@ -36,24 +27,12 @@ const scrapers: BaseScraper[] = [
     enabled: true,
     cronSchedule: '0 */6 * * *', // Every 6 hours
   }),
-  new NoticiasLaRepublicaScraper({
-    name: 'noticias-la-republica',
-    category: 'NOTICIAS' as NewsCategory,
-    enabled: true,
-    cronSchedule: '0 */4 * * *', // Every 4 hours
-  }),
-  new NoticiasGestionScraper({
-    name: 'noticias-gestion',
-    category: 'NOTICIAS' as NewsCategory,
-    enabled: true,
-    cronSchedule: '0 */4 * * *', // Every 4 hours
-  }),
 ];
 
 /**
  * Global variable to store scheduled tasks
  */
-let scheduledTasks: Map<string, ReturnType<typeof cron.schedule>> = new Map();
+const scheduledTasks: Map<string, ReturnType<typeof cron.schedule>> = new Map();
 
 /**
  * Start the scheduler - runs all enabled scrapers on their cron schedules
@@ -62,7 +41,7 @@ export function startScheduler() {
   console.log('Starting scraper scheduler...');
 
   scrapers.forEach((scraper) => {
-    const config = (scraper as any).config as ScraperConfig;
+    const config = scraper.settings;
 
     if (config.enabled) {
       console.log(`Scheduling scraper: ${config.name} (${config.cronSchedule})`);
@@ -100,7 +79,7 @@ export function stopScheduler() {
  * Manually run a specific scraper by name
  */
 export async function runScraperManually(name: string) {
-  const scraper = scrapers.find((s) => (s as any).config.name === name);
+  const scraper = scrapers.find((s) => s.settings.name === name);
 
   if (!scraper) {
     throw new Error(`Scraper not found: ${name}`);
@@ -115,7 +94,7 @@ export async function runScraperManually(name: string) {
  */
 export function getScraperStatus() {
   return scrapers.map((scraper) => {
-    const config = (scraper as any).config as ScraperConfig;
+    const config = scraper.settings;
     const isRunning = scheduledTasks.has(config.name);
 
     return {

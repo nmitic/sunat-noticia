@@ -3,8 +3,6 @@ import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 export const UI_TEXT = {
   categories: {
     OFICIAL: 'Oficial',
-    REDES_SOCIALES: 'Redes Sociales',
-    NOTICIAS: 'Noticias',
   },
   flags: {
     IMPORTANTE: 'Importante',

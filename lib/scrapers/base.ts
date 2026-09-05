@@ -27,6 +27,13 @@ export abstract class BaseScraper {
   }
 
   /**
+   * Public, read-only view of this scraper's configuration
+   */
+  get settings(): Readonly<ScraperConfig> {
+    return this.config;
+  }
+
+  /**
    * Main scraping method to implement in subclasses
    */
   abstract scrape(): Promise<ScrapedNewsItem[]>;

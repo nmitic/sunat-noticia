@@ -23,10 +23,6 @@ const getCategoryIcon = (category: NewsCategory) => {
   switch (category) {
     case 'OFICIAL':
       return <Image src="/sunat.svg" alt="SUNAT" width={16} height={16} />;
-    case 'REDES_SOCIALES':
-      return <Image src="/facebook.svg" alt="Facebook" width={16} height={16} />;
-    case 'NOTICIAS':
-      return <Newspaper className="w-4 h-4" />;
   }
 };
 
