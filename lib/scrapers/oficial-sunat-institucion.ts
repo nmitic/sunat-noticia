@@ -1,5 +1,7 @@
 import { BaseScraper, ScrapedNewsItem } from './base';
 import { decodeContent } from '@/lib/utils/decode-content';
+import { fetchHtml } from './fetch-html';
+import { cleanArticleText, extractElementByClass, htmlToText } from '@/lib/utils/extract-article';
 
 interface NewsMetadata {
   title: string;
@@ -56,24 +58,8 @@ export class OficialSunatInstitucionScraper extends BaseScraper {
    * Fetch HTML from a URL with proper headers
    */
   private async fetchPageHtml(url: string): Promise<string> {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'SUNAT-Noticias/1.0',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch ${url}: ${response.status} ${response.statusText}`
-      );
-    }
-
-    // Get raw buffer to handle encoding properly
-    const buffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-
-    // gob.pe typically uses UTF-8
-    return new TextDecoder('utf-8').decode(bytes);
+    // gob.pe serves UTF-8
+    return fetchHtml(url, { fallbackCharset: 'utf-8' });
   }
 
   /**
@@ -145,30 +131,27 @@ export class OficialSunatInstitucionScraper extends BaseScraper {
   }
 
   /**
-   * Fetch the full article content from a news URL
+   * Fetch the full article content from a news URL.
+   *
+   * gob.pe wraps each paragraph of the article in its own <div> inside
+   * .feed-content, so the container must be matched with balanced-tag counting;
+   * a lazy `(.*?)</div>` stops at the first paragraph and drops the rest.
    */
   private async fetchArticleContent(url: string): Promise<string> {
     const html = await this.fetchPageHtml(url);
 
-    // Extract content from the feed-content div
-    const contentRegex = /<div[^>]*class="[^"]*feed-content[^"]*"[^>]*>(.*?)<\/div>/is;
-    const contentMatch = contentRegex.exec(html);
+    const container = extractElementByClass(html, 'div', 'feed-content');
 
-    if (!contentMatch) {
+    if (container === null) {
       console.warn(`[${this.source}] Could not find feed-content div in ${url}`);
       return '';
     }
 
-    let content = contentMatch[1].trim();
-
-    // Strip HTML tags and decode entities
-    content = this.stripHtmlTags(content);
-
-    return content;
+    return cleanArticleText(htmlToText(container));
   }
 
   /**
-   * Strip HTML tags and decode entities
+   * Strip HTML tags and decode entities (listing titles only)
    */
   private stripHtmlTags(html: string): string {
     // First decode HTML entities

@@ -11,10 +11,11 @@ import {
   getSeverityTintClasses,
 } from '@/lib/utils/badges';
 import { FlagIcon } from '@/lib/utils/flag-icons';
+import { NewsContent } from '@/components/news/NewsContent';
 import { getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Trash2, EyeOff, Calendar, ExternalLink, BadgeCheck } from 'lucide-react';
+import { Trash2, EyeOff, Calendar, ExternalLink, BadgeCheck, Download } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -58,6 +59,10 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
     addSuffix: true,
     locale: es,
   });
+
+  // Sala de Prensa links point at Word documents rather than web pages, so the
+  // action has to promise a download instead of a page.
+  const isDownload = /\.(docx?|pdf|xlsx?)(\?|$)/i.test(news.sourceUrl ?? '');
 
   const flags = news.flags || [];
   const primaryFlag = getPrimaryFlag(flags);
@@ -178,24 +183,13 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
 
       {/* Headline + excerpt */}
       <div className="space-y-2 px-5 pb-4">
-        <h3 className="text-lg leading-snug font-semibold text-balance">
-          {news.sourceUrl ? (
-            <a
-              href={news.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="line-clamp-3 decoration-2 underline-offset-4 hover:underline"
-            >
-              {news.title}
-            </a>
-          ) : (
-            <span className="line-clamp-3">{news.title}</span>
-          )}
+        {/* Not a link: the full text is on the card now, and the action bar
+            below carries the deliberate route out to the official source. */}
+        <h3 className="line-clamp-3 text-lg leading-snug font-semibold text-balance">
+          {news.title}
         </h3>
 
-        <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-          {news.content}
-        </p>
+        <NewsContent content={news.content} />
       </div>
 
       {/* Date bar — the absolute date leads, the relative one supports it */}
@@ -241,8 +235,8 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
           {news.sourceUrl && (
             <Button variant="outline" size="sm" asChild>
               <a href={news.sourceUrl} target="_blank" rel="noopener noreferrer">
-                Leer más
-                <ExternalLink />
+                {isDownload ? 'Descargar nota de prensa' : 'Leer noticia oficial'}
+                {isDownload ? <Download /> : <ExternalLink />}
               </a>
             </Button>
           )}
