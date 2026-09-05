@@ -4,7 +4,11 @@
  * module among several, not the whole offering.
  */
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.perunio.pe';
+/**
+ * Ads point at the perunio.pe marketing site, not the app's registration form —
+ * cold traffic from a news feed needs the pitch before the signup.
+ */
+const HOME_URL = process.env.NEXT_PUBLIC_HOME_URL || 'https://perunio.pe';
 
 export type AdSlug = 'plataforma' | 'automatiza' | 'plan-gratis';
 
@@ -37,7 +41,7 @@ export function adHref(unit: AdUnit): string {
     utm_campaign: unit.slug,
   });
 
-  return `${APP_URL}${unit.path}?${params.toString()}`;
+  return `${HOME_URL}${unit.path}?${params.toString()}`;
 }
 
 export const AD_UNITS: Record<AdSlug, AdUnit> = {
@@ -57,21 +61,21 @@ export const AD_UNITS: Record<AdSlug, AdUnit> = {
       { icon: 'shield', label: 'Validación de comprobantes' },
     ],
     trustLine: 'Sin tarjeta de crédito · Configuración en 2 minutos',
-    cta: 'Comenzar Gratis Ahora',
-    path: '/register',
+    cta: 'Conoce la plataforma',
+    path: '/',
   },
   automatiza: {
     slug: 'automatiza',
     headline: 'Automatiza tus descargas y consultas SUNAT',
     cta: 'Ver todos los módulos',
-    path: '/register',
+    path: '/descarga-masiva-comprobantes-sunat',
     compactIcon: 'bot',
   },
   'plan-gratis': {
     slug: 'plan-gratis',
     headline: 'Plan gratuito · Sin tarjeta de crédito',
-    cta: 'Crear cuenta',
-    path: '/register',
+    cta: 'Ver planes',
+    path: '/planes',
     compactIcon: 'shield',
   },
 };
