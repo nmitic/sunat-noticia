@@ -8,6 +8,11 @@ interface ShareButtonProps {
   title: string;
   /** Absolute or root-relative; resolved against the current origin. */
   url: string;
+  /**
+   * Drop the label and render a square icon button. Used in the feed card,
+   * where the row already carries two labelled actions.
+   */
+  iconOnly?: boolean;
 }
 
 /**
@@ -17,7 +22,7 @@ interface ShareButtonProps {
  * copying the link. The URL is resolved on the client so the button works
  * across localhost, preview and production without a configured base URL.
  */
-export function ShareButton({ title, url }: ShareButtonProps) {
+export function ShareButton({ title, url, iconOnly = false }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -51,16 +56,18 @@ export function ShareButton({ title, url }: ShareButtonProps) {
     }
   };
 
+  const label = copied ? 'Enlace copiado' : 'Compartir';
+
   return (
     <Button
-      variant="outline"
-      size="sm"
+      variant={iconOnly ? 'ghost' : 'outline'}
+      size={iconOnly ? 'icon-sm' : 'sm'}
       onClick={handleShare}
       aria-live="polite"
-      title="Compartir esta noticia"
+      title={copied ? label : 'Compartir esta noticia'}
     >
       {copied ? <Check /> : <Share2 />}
-      {copied ? 'Enlace copiado' : 'Compartir'}
+      {iconOnly ? <span className="sr-only">{label}</span> : label}
     </Button>
   );
 }

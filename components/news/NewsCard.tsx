@@ -13,6 +13,7 @@ import {
 import { FlagIcon } from '@/lib/utils/flag-icons';
 import { NewsContent } from '@/components/news/NewsContent';
 import { OutageSummary } from '@/components/news/OutageSummary';
+import { ShareButton } from '@/components/news/ShareButton';
 import { displayTitle } from '@/lib/outage/title';
 import type { StructuredOutage } from '@/lib/outage/types';
 import { getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
@@ -161,7 +162,7 @@ export function NewsCard({ news, embeded = false }: NewsCardProps) {
       </div>
 
       {/* Date bar — the absolute date leads, the relative one supports it */}
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border px-5 py-3">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-border px-5 py-3">
         <time
           dateTime={originalDate.toISOString()}
           title={dateTitle}
@@ -172,22 +173,29 @@ export function NewsCard({ news, embeded = false }: NewsCardProps) {
           <span className="text-muted-foreground">· {relativeDate}</span>
         </time>
 
-        <div className="flex items-center gap-1">
+        {/* Actions read right to left in weight: share is a quiet icon, the
+            official source is secondary, and the site's own page is primary.
+            The labels stay short so the three fit one line on a narrow card. */}
+        <div className="flex items-center gap-2 sm:ml-auto">
           {detailPath && (
-            <Button variant="ghost" size="sm" asChild>
-              <Link href={detailPath} {...linkTarget}>
-                Ver noticia
-                <ArrowRight />
-              </Link>
-            </Button>
+            <ShareButton title={heading} url={detailPath} iconOnly />
           )}
 
           {news.sourceUrl && (
             <Button variant="outline" size="sm" asChild>
               <a href={news.sourceUrl} target="_blank" rel="noopener noreferrer">
-                {isDownload ? 'Descargar nota de prensa' : 'Leer noticia oficial'}
                 {isDownload ? <Download /> : <ExternalLink />}
+                {isDownload ? 'Nota de prensa' : 'Fuente oficial'}
               </a>
+            </Button>
+          )}
+
+          {detailPath && (
+            <Button size="sm" asChild>
+              <Link href={detailPath} {...linkTarget}>
+                Ver noticia
+                <ArrowRight />
+              </Link>
             </Button>
           )}
         </div>
