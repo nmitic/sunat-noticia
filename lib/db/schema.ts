@@ -6,10 +6,12 @@ import {
   timestamp,
   integer,
   index,
+  jsonb,
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
+import type { StructuredOutage } from '@/lib/outage/types';
 
 // Enums
 export const newsCategoryEnum = pgEnum('NewsCategory', ['OFICIAL']);
@@ -48,6 +50,12 @@ export const news = pgTable(
       .notNull()
       .default(sql`ARRAY[]::text[]`),
     publishedAt: timestamp('publishedAt', { withTimezone: true }),
+    // Outage details parsed out of the notice prose and approved by an admin.
+    // Null for every item that is not a CAIDA_SISTEMA notice, and for those
+    // whose extraction has not been approved yet — the parse itself is never
+    // stored, only the reviewed result.
+    structuredData: jsonb('structuredData').$type<StructuredOutage>(),
+    structuredDataAt: timestamp('structuredDataAt', { withTimezone: true }),
     scrapedAt: timestamp('scrapedAt', { withTimezone: true })
       .notNull()
       .defaultNow(),

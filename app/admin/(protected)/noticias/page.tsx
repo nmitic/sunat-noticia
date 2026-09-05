@@ -7,6 +7,9 @@ export const metadata = {
   title: 'Noticias Pendientes - Panel Administrativo',
 };
 
+/** Newest first, capped — the panel moderates recent news, it is not an archive. */
+const PUBLISHED_LIMIT = 100;
+
 export default async function AdminNoticiasPage() {
   // Fetch unpublished news
   const newsRows = await db.select({
@@ -19,6 +22,7 @@ export default async function AdminNoticiasPage() {
     flags: newsTable.flags,
     originalDate: newsTable.originalDate,
     scrapedAt: newsTable.scrapedAt,
+    structuredData: newsTable.structuredData,
   }).from(newsTable)
     .where(eq(newsTable.published, false))
     .orderBy(desc(newsTable.scrapedAt));
@@ -28,5 +32,29 @@ export default async function AdminNoticiasPage() {
     flags: (row.flags as NewsFlag[]) || [],
   }));
 
-  return <AdminNoticiasContent initialNews={news} />;
+  // Already-live news, moderated from the panel now that the public feed
+  // carries no admin controls.
+  const publishedRows = await db.select({
+    id: newsTable.id,
+    title: newsTable.title,
+    content: newsTable.content,
+    source: newsTable.source,
+    sourceUrl: newsTable.sourceUrl,
+    category: newsTable.category,
+    flags: newsTable.flags,
+    originalDate: newsTable.originalDate,
+    scrapedAt: newsTable.scrapedAt,
+    publishedAt: newsTable.publishedAt,
+    structuredData: newsTable.structuredData,
+  }).from(newsTable)
+    .where(eq(newsTable.published, true))
+    .orderBy(desc(newsTable.originalDate))
+    .limit(PUBLISHED_LIMIT);
+
+  const publishedNews = publishedRows.map(row => ({
+    ...row,
+    flags: (row.flags as NewsFlag[]) || [],
+  }));
+
+  return <AdminNoticiasContent initialNews={news} initialPublishedNews={publishedNews} />;
 }

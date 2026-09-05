@@ -1,6 +1,8 @@
 import { NewsCategory } from '@/lib/db/schema';
 import { getCategoryColorClasses } from '@/lib/utils/badges';
 import { getCategoryLabel } from '@/lib/utils/constants';
+import { displayTitle } from '@/lib/outage/title';
+import type { StructuredOutage } from '@/lib/outage/types';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Image from 'next/image';
@@ -15,6 +17,7 @@ interface NewsCardProps {
     category: NewsCategory;
     originalDate: Date;
     scrapedAt?: Date;
+    structuredData?: StructuredOutage | null;
   };
 }
 
@@ -35,7 +38,11 @@ export function NewsCard({ news }: NewsCardProps) {
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-50">{news.title}</h3>
+          {/* Same headline the public side shows, so an admin reviewing outage
+              data sees the result of approving it. */}
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-50">
+            {displayTitle(news)}
+          </h3>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{news.source}</p>
         </div>
         <span className={`whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium flex items-center gap-2 ${getCategoryColorClasses(news.category)}`}>

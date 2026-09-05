@@ -11,6 +11,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --import tsx --test lib/**/*.test.ts",
     "db:local:generate": "dotenv -e .env.local -- drizzle-kit generate",
     "db:prod:generate": "dotenv -e .env -- drizzle-kit generate",
     "db:local:migrate": "dotenv -e .env.local -- drizzle-kit migrate",

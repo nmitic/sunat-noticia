@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { NewsCard } from './NewsCard';
 import { FlagSelector } from './FlagSelector';
+import { OutageExtractor } from './OutageExtractor';
 import { UI_TEXT } from '@/lib/utils/constants';
 import { Send, Trash2 } from 'lucide-react';
+import type { StructuredOutage } from '@/lib/outage/types';
 
 interface NewsItem {
   id: string;
@@ -17,6 +19,7 @@ interface NewsItem {
   flags: NewsFlag[];
   originalDate: Date;
   scrapedAt: Date;
+  structuredData?: StructuredOutage | null;
 }
 
 interface ReviewQueueProps {
@@ -199,6 +202,16 @@ export function ReviewQueue({ initialNews, onNewsUpdated }: ReviewQueueProps) {
                 setSelectedFlags({ ...selectedFlags, [item.id]: flags })
               }
             />
+
+            {/* Outage extraction is only meaningful for a caída de sistema, so
+                it appears the moment that flag is ticked. */}
+            {(selectedFlags[item.id] || []).includes('CAIDA_SISTEMA') && (
+              <OutageExtractor
+                newsId={item.id}
+                flags={selectedFlags[item.id] || []}
+                initial={item.structuredData ?? null}
+              />
+            )}
 
             <div className="flex gap-3">
               <button

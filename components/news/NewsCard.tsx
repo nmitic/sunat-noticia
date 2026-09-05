@@ -12,14 +12,15 @@ import {
 } from '@/lib/utils/badges';
 import { FlagIcon } from '@/lib/utils/flag-icons';
 import { NewsContent } from '@/components/news/NewsContent';
+import { OutageSummary } from '@/components/news/OutageSummary';
+import { displayTitle } from '@/lib/outage/title';
+import type { StructuredOutage } from '@/lib/outage/types';
 import { getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Trash2, EyeOff, Calendar, ExternalLink, BadgeCheck, Download, ArrowRight } from 'lucide-react';
+import { Calendar, ExternalLink, BadgeCheck, Download, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { formatAbsoluteDate } from '@/lib/utils/news-date';
 import { newsPath } from '@/lib/utils/news-url';
 
@@ -34,17 +35,18 @@ interface NewsCardProps {
     flags?: NewsFlag[];
     originalDate: Date;
     publishedAt?: Date | null;
+    structuredData?: StructuredOutage | null;
   };
-  isAdmin?: boolean;
   /** Rendered inside a third-party iframe — links must escape the frame. */
   embeded?: boolean;
 }
 
-export function NewsCard({ news, isAdmin = false, embeded = false }: NewsCardProps) {
-  const router = useRouter();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isUnpublishing, setIsUnpublishing] = useState(false);
-
+/**
+ * The reader-facing card. Purely presentational: every moderation action lives
+ * in the admin panel, so this renders the same markup for an anonymous visitor
+ * and a signed-in admin.
+ */
+export function NewsCard({ news, embeded = false }: NewsCardProps) {
   const originalDate = new Date(news.originalDate);
   const absoluteDate = formatAbsoluteDate(originalDate);
   const relativeDate = formatDistanceToNow(originalDate, {
@@ -59,7 +61,14 @@ export function NewsCard({ news, isAdmin = false, embeded = false }: NewsCardPro
   // Every item gets its own shareable page. This card only ever renders
   // published rows (the admin queue has its own card), so the route resolves
   // whether or not an admin is signed in.
+  //
+  // The slug stays keyed to the stored title: approving outage data changes the
+  // headline, and rebuilding the slug from it would break links already shared.
   const detailPath = news.id ? newsPath({ id: news.id, title: news.title }) : null;
+
+  // Approved outage data gives a real headline in place of the scraped first
+  // sentence of the notice.
+  const heading = displayTitle(news);
 
   // In an embed the feed lives in someone else's iframe, so navigating in
   // place would strand the reader inside a frame they can't get out of.
@@ -82,65 +91,6 @@ export function NewsCard({ news, isAdmin = false, embeded = false }: NewsCardPro
     publishedAt && Math.abs(publishedAt.getTime() - originalDate.getTime()) > 60 * 60 * 1000
       ? `Publicado en SUNAT Noticias el ${format(publishedAt, "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })}`
       : undefined;
-
-  const handleDelete = async () => {
-    if (!news.id) return;
-
-    if (!confirm('¿Estás seguro de que quieres eliminar esta noticia?')) {
-      return;
-    }
-
-    setIsDeleting(true);
-    try {
-      const response = await fetch(`/api/news/${news.id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar la noticia');
-      }
-
-      router.refresh();
-    } catch (error) {
-      console.error('Error deleting news:', error);
-      alert('Error al eliminar la noticia');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleUnpublish = async () => {
-    if (!news.id) return;
-
-    if (!confirm('¿Estás seguro de que quieres despublicar esta noticia?')) {
-      return;
-    }
-
-    setIsUnpublishing(true);
-    try {
-      const response = await fetch(`/api/news/${news.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          published: false,
-          flags: news.flags || [],
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al despublicar la noticia');
-      }
-
-      router.refresh();
-    } catch (error) {
-      console.error('Error unpublishing news:', error);
-      alert('Error al despublicar la noticia');
-    } finally {
-      setIsUnpublishing(false);
-    }
-  };
 
   return (
     <Card
@@ -193,14 +143,21 @@ export function NewsCard({ news, isAdmin = false, embeded = false }: NewsCardPro
               {...linkTarget}
               className="underline-offset-4 hover:underline"
             >
-              {news.title}
+              {heading}
             </Link>
           ) : (
-            news.title
+            heading
           )}
         </h3>
 
-        <NewsContent content={news.content} />
+        {/* Approved outage data answers the reader's question directly, so it
+            replaces the prose rather than sitting alongside it. The full text
+            is still one click away on the detail page. */}
+        {news.structuredData ? (
+          <OutageSummary data={news.structuredData} compact />
+        ) : (
+          <NewsContent content={news.content} />
+        )}
       </div>
 
       {/* Date bar — the absolute date leads, the relative one supports it */}
@@ -216,33 +173,6 @@ export function NewsCard({ news, isAdmin = false, embeded = false }: NewsCardPro
         </time>
 
         <div className="flex items-center gap-1">
-          {isAdmin && news.id && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleUnpublish}
-                disabled={isUnpublishing}
-                className="text-muted-foreground hover:text-foreground"
-                title="Despublicar noticia"
-              >
-                <EyeOff />
-                {isUnpublishing ? 'Despublicando...' : 'Despublicar'}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                title="Eliminar noticia"
-              >
-                <Trash2 />
-                {isDeleting ? 'Eliminando...' : 'Eliminar'}
-              </Button>
-            </>
-          )}
-
           {detailPath && (
             <Button variant="ghost" size="sm" asChild>
               <Link href={detailPath} {...linkTarget}>

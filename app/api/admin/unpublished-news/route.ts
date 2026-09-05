@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
       flags: newsTable.flags,
       originalDate: newsTable.originalDate,
       scrapedAt: newsTable.scrapedAt,
+      structuredData: newsTable.structuredData,
     }).from(newsTable)
       .where(eq(newsTable.published, false))
       .orderBy(desc(newsTable.scrapedAt));

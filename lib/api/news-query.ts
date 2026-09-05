@@ -1,6 +1,7 @@
 import { eq, desc, and, lt, or, sql } from 'drizzle-orm';
 import { db, newsTable } from '@/lib/db/drizzle';
 import { NewsFlag, NewsCategory } from '@/lib/db/schema';
+import type { StructuredOutage } from '@/lib/outage/types';
 
 export type NewsRow = {
   id: string;
@@ -12,6 +13,8 @@ export type NewsRow = {
   flags: NewsFlag[];
   originalDate: Date;
   publishedAt: Date | null;
+  /** Present only on outage notices an admin has reviewed and approved. */
+  structuredData: StructuredOutage | null;
 };
 
 export type NewsQueryResult = {
@@ -59,6 +62,7 @@ export async function queryPublishedNews(params: {
     flags: newsTable.flags,
     originalDate: newsTable.originalDate,
     publishedAt: newsTable.publishedAt,
+    structuredData: newsTable.structuredData,
   }).from(newsTable)
     .where(and(...conditions))
     .orderBy(desc(newsTable.originalDate))

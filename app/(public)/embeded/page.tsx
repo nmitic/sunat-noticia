@@ -2,6 +2,7 @@ import { db, newsTable } from '@/lib/db/drizzle';
 import { NewsFeed } from '@/components/news/NewsFeed';
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
 import { eq, desc, and, or, sql } from 'drizzle-orm';
+import type { StructuredOutage } from '@/lib/outage/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,7 @@ interface NewsItem {
   flags: NewsFlag[];
   originalDate: Date;
   publishedAt: Date | null;
+  structuredData: StructuredOutage | null;
 }
 
 interface PageProps {
@@ -69,6 +71,7 @@ export default async function EmbeddedPage({ searchParams }: PageProps) {
       flags: newsTable.flags,
       originalDate: newsTable.originalDate,
       publishedAt: newsTable.publishedAt,
+      structuredData: newsTable.structuredData,
     }).from(newsTable)
       .where(and(...conditions))
       .orderBy(desc(newsTable.originalDate))

@@ -12,6 +12,7 @@ import { SeverityLegend } from '@/components/news/SeverityLegend';
 import { PerunioAd } from '@/components/ads/PerunioAd';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
+import type { StructuredOutage } from '@/lib/outage/types';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { RadioTower } from 'lucide-react';
@@ -33,6 +34,7 @@ interface NewsItem {
   flags: NewsFlag[];
   originalDate: Date;
   publishedAt: Date | null;
+  structuredData: StructuredOutage | null;
 }
 
 interface PageProps {
@@ -40,7 +42,8 @@ interface PageProps {
 }
 
 export default async function HomePage({ searchParams }: PageProps) {
-  // Check if user is admin (server-side)
+  // Only decides whether the header offers a link back to the panel — the feed
+  // itself is identical for every visitor, admin or not.
   const session = await getServerSession(authOptions);
   const isAdmin = !!session;
 
@@ -88,6 +91,7 @@ export default async function HomePage({ searchParams }: PageProps) {
       flags: newsTable.flags,
       originalDate: newsTable.originalDate,
       publishedAt: newsTable.publishedAt,
+      structuredData: newsTable.structuredData,
     }).from(newsTable)
       .where(and(...conditions))
       .orderBy(desc(newsTable.originalDate))
@@ -144,7 +148,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                   </p>
                 </div>
               ) : (
-                <NewsFeed key={feedKey} initialNews={news} isAdmin={isAdmin} />
+                <NewsFeed key={feedKey} initialNews={news} />
               )}
             </div>
 

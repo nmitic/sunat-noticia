@@ -2,10 +2,12 @@
 
 import { useState, useCallback } from 'react';
 import { ReviewQueue } from './ReviewQueue';
+import { PublishedNewsList, type PublishedNewsItem } from './PublishedNewsList';
 import { ScraperControls } from './ScraperControls';
 import { ScraperRunsLog } from './ScraperRunsLog';
 import { UI_TEXT } from '@/lib/utils/constants';
 import { NewsCategory, NewsFlag } from '@/lib/db/schema';
+import type { StructuredOutage } from '@/lib/outage/types';
 
 interface NewsItem {
   id: string;
@@ -17,15 +19,23 @@ interface NewsItem {
   flags: NewsFlag[];
   originalDate: Date;
   scrapedAt: Date;
+  structuredData?: StructuredOutage | null;
 }
 
 interface AdminNoticiasContentProps {
   initialNews: NewsItem[];
+  initialPublishedNews: PublishedNewsItem[];
 }
 
-export function AdminNoticiasContent({ initialNews }: AdminNoticiasContentProps) {
+type Tab = 'pending' | 'published';
+
+export function AdminNoticiasContent({
+  initialNews,
+  initialPublishedNews,
+}: AdminNoticiasContentProps) {
   const [news, setNews] = useState<NewsItem[]>(initialNews);
   const [isRefetching, setIsRefetching] = useState(false);
+  const [tab, setTab] = useState<Tab>('pending');
 
   const refetchNews = useCallback(async () => {
     setIsRefetching(true);
@@ -50,19 +60,48 @@ export function AdminNoticiasContent({ initialNews }: AdminNoticiasContentProps)
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
-              {UI_TEXT.admin.reviewQueue}
+              {tab === 'pending' ? UI_TEXT.admin.reviewQueue : UI_TEXT.admin.publishedNews.title}
             </h1>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
-              Total: <span className="font-semibold">{news.length}</span> noticias pendientes
+              {tab === 'pending' ? (
+                <>
+                  Total: <span className="font-semibold">{news.length}</span> noticias pendientes
+                </>
+              ) : (
+                UI_TEXT.admin.publishedNews.description
+              )}
             </p>
           </div>
 
-          {news.length > 0 ? (
-            <ReviewQueue initialNews={news} onNewsUpdated={refetchNews} />
+          {/* Published news has no controls on the public site any more, so the
+              panel is the only place to reach it. */}
+          <div
+            role="tablist"
+            aria-label="Estado de las noticias"
+            className="flex gap-1 border-b border-border"
+          >
+            <TabButton
+              active={tab === 'pending'}
+              onClick={() => setTab('pending')}
+              label={`${UI_TEXT.admin.tabPending} (${news.length})`}
+            />
+            <TabButton
+              active={tab === 'published'}
+              onClick={() => setTab('published')}
+              label={UI_TEXT.admin.tabPublished}
+            />
+          </div>
+
+          {tab === 'pending' ? (
+            news.length > 0 ? (
+              <ReviewQueue initialNews={news} onNewsUpdated={refetchNews} />
+            ) : (
+              <div className="rounded-lg border border-dashed border-border bg-gray-50 dark:bg-gray-900 p-12 text-center">
+                <p className="text-muted-foreground">{UI_TEXT.admin.noNews}</p>
+              </div>
+            )
           ) : (
-            <div className="rounded-lg border border-dashed border-border bg-gray-50 dark:bg-gray-900 p-12 text-center">
-              <p className="text-muted-foreground">{UI_TEXT.admin.noNews}</p>
-            </div>
+            <PublishedNewsList initialNews={initialPublishedNews} />
           )}
         </div>
       </div>
@@ -73,5 +112,31 @@ export function AdminNoticiasContent({ initialNews }: AdminNoticiasContentProps)
         <ScraperRunsLog />
       </div>
     </div>
+  );
+}
+
+function TabButton({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+        active
+          ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+          : 'border-transparent text-muted-foreground hover:text-foreground'
+      }`}
+    >
+      {label}
+    </button>
   );
 }

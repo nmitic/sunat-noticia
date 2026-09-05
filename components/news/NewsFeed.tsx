@@ -23,10 +23,9 @@ interface NewsItem {
 interface NewsFeedProps {
   initialNews: NewsItem[];
   embeded?: boolean;
-  isAdmin?: boolean;
 }
 
-export function NewsFeed({ initialNews, embeded = false, isAdmin = false }: NewsFeedProps) {
+export function NewsFeed({ initialNews, embeded = false }: NewsFeedProps) {
   const searchParams = useSearchParams();
 
   // Read current filters directly from URL (no state needed)
@@ -127,7 +126,7 @@ export function NewsFeed({ initialNews, embeded = false, isAdmin = false }: News
         {allNews.length > 0 ? (
           <>
             {allNews.map((item) => (
-              <NewsCard key={item.id} news={item} isAdmin={isAdmin} embeded={embeded} />
+              <NewsCard key={item.id} news={item} embeded={embeded} />
             ))}
 
             {/* Observer target - triggers load when visible */}

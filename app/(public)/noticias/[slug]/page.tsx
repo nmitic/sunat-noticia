@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   BadgeCheck,
   Calendar,
+  ChevronRight,
   Download,
   ExternalLink,
 } from 'lucide-react';
@@ -23,6 +24,7 @@ import {
 } from '@/components/layout/EmailSubscriptionForm';
 import { PerunioAd } from '@/components/ads/PerunioAd';
 import { ShareButton } from '@/components/news/ShareButton';
+import { OutageSummary } from '@/components/news/OutageSummary';
 import { Button } from '@/components/ui/button';
 import { FlagIcon } from '@/lib/utils/flag-icons';
 import {
@@ -35,6 +37,7 @@ import {
 import { getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
 import { formatAbsoluteDate, formatFullDate } from '@/lib/utils/news-date';
 import { newsPath, parseNewsSlug } from '@/lib/utils/news-url';
+import { displayTitle } from '@/lib/outage/title';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 
@@ -62,6 +65,7 @@ async function getNews(slug: string) {
       flags: newsTable.flags,
       originalDate: newsTable.originalDate,
       publishedAt: newsTable.publishedAt,
+      structuredData: newsTable.structuredData,
     })
     .from(newsTable)
     .where(and(eq(newsTable.id, id), eq(newsTable.published, true)))
@@ -80,6 +84,7 @@ async function getRelated(excludeId: string) {
       title: newsTable.title,
       flags: newsTable.flags,
       originalDate: newsTable.originalDate,
+      structuredData: newsTable.structuredData,
     })
     .from(newsTable)
     .where(and(eq(newsTable.published, true), ne(newsTable.id, excludeId)))
@@ -101,14 +106,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // share description.
   const description = news.content.replace(/\s+/g, ' ').trim().slice(0, 200);
   const path = newsPath(news);
+  const heading = displayTitle(news);
 
-  // Titles are derived from the comunicado body and run to full sentences —
-  // far past what a tab or a search result shows. Trim for the <title> only;
-  // the heading and share card keep the whole thing.
+  // Scraped titles are derived from the comunicado body and run to full
+  // sentences — far past what a tab or a search result shows. Trim for the
+  // <title> only; the heading and share card keep the whole thing. A generated
+  // outage title is already short enough to pass through untouched.
   const tabTitle =
-    news.title.length > 65
-      ? `${news.title.slice(0, 65).replace(/\s+\S*$/, '')}…`
-      : news.title;
+    heading.length > 65 ? `${heading.slice(0, 65).replace(/\s+\S*$/, '')}…` : heading;
 
   return {
     title: `${tabTitle} · SUNAT Noticias`,
@@ -116,7 +121,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: { canonical: path },
     openGraph: {
       type: 'article',
-      title: news.title,
+      title: heading,
       description,
       url: path,
       publishedTime: new Date(news.originalDate).toISOString(),
@@ -124,7 +129,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: 'summary',
-      title: news.title,
+      title: heading,
       description,
     },
   };
@@ -168,6 +173,10 @@ export default async function NewsDetailPage({ params }: PageProps) {
     .filter(Boolean);
 
   const path = newsPath(news);
+
+  // Approved outage data yields a real headline; without it the scraped first
+  // sentence is still the best available.
+  const heading = displayTitle(news);
 
   return (
     <>
@@ -225,9 +234,9 @@ export default async function NewsDetailPage({ params }: PageProps) {
                 </span>
               </div>
 
-              <div className="px-5 pb-6 sm:px-8">
+              <div className="px-5 p-6 sm:px-8">
                 <h1 className="text-2xl leading-tight font-bold tracking-tight text-balance sm:text-3xl">
-                  {news.title}
+                  {heading}
                 </h1>
 
                 <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border pb-5">
@@ -240,15 +249,43 @@ export default async function NewsDetailPage({ params }: PageProps) {
                     <span className="text-muted-foreground">· {relativeDate}</span>
                   </time>
 
-                  <ShareButton title={news.title} url={path} />
+                  <ShareButton title={heading} url={path} />
                 </div>
 
-                {/* Full text, unclamped — this page exists to show all of it. */}
-                <div className="mt-6 space-y-4 leading-relaxed text-foreground/90">
-                  {paragraphs.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
-                </div>
+                {news.structuredData ? (
+                  <>
+                    {/* Reviewed outage data stands in for the notice: it says
+                        the same thing without the paragraph of Spanish. */}
+                    <OutageSummary data={news.structuredData} />
+
+                    {/* The source wording can still carry a detail the
+                        extraction does not model, so it stays reachable. */}
+                    <details className="group mt-6 rounded-lg border border-border">
+                      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-foreground/80 transition-colors hover:text-foreground">
+                        <span className="inline-flex items-center gap-1.5">
+                          <ChevronRight
+                            className="size-4 transition-transform group-open:rotate-90"
+                            aria-hidden="true"
+                          />
+                          Ver el comunicado original
+                        </span>
+                      </summary>
+
+                      <div className="space-y-4 border-t border-border px-4 py-4 leading-relaxed text-foreground/90">
+                        {paragraphs.map((paragraph, index) => (
+                          <p key={index}>{paragraph}</p>
+                        ))}
+                      </div>
+                    </details>
+                  </>
+                ) : (
+                  /* Full text, unclamped — this page exists to show all of it. */
+                  <div className="mt-6 space-y-4 leading-relaxed text-foreground/90">
+                    {paragraphs.map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                )}
 
                 <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-6">
                   {news.sourceUrl && (
@@ -283,7 +320,9 @@ export default async function NewsDetailPage({ params }: PageProps) {
                           href={newsPath(item)}
                           className="flex flex-col gap-1.5 px-4 py-3 transition-colors hover:bg-muted/50"
                         >
-                          <span className="line-clamp-2 text-sm font-medium">{item.title}</span>
+                          <span className="line-clamp-2 text-sm font-medium">
+                            {displayTitle(item)}
+                          </span>
                           <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                             {itemFlag && (
                               <span
