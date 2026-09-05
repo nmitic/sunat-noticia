@@ -1,6 +1,7 @@
 import { NewsCategory } from '@/lib/db/schema';
 import { getCategoryColorClasses } from '@/lib/utils/badges';
 import { getCategoryLabel } from '@/lib/utils/constants';
+import { NewsContent } from '@/components/news/NewsContent';
 import { displayTitle } from '@/lib/outage/title';
 import type { StructuredOutage } from '@/lib/outage/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -51,7 +52,10 @@ export function NewsCard({ news }: NewsCardProps) {
         </span>
       </div>
 
-      <p className="line-clamp-3 text-sm text-gray-600 dark:text-gray-400">{news.content}</p>
+      {/* Reviewing a notice means reading it, so the full text has to be
+          reachable without leaving the panel. Same expander the public feed
+          uses — clamped by default so a long queue stays scannable. */}
+      <NewsContent content={news.content} />
 
       <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
         <span>{dateStr}</span>
