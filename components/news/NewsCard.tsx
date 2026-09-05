@@ -13,12 +13,15 @@ import {
 import { FlagIcon } from '@/lib/utils/flag-icons';
 import { NewsContent } from '@/components/news/NewsContent';
 import { getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
-import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Trash2, EyeOff, Calendar, ExternalLink, BadgeCheck, Download } from 'lucide-react';
+import { Trash2, EyeOff, Calendar, ExternalLink, BadgeCheck, Download, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { formatAbsoluteDate } from '@/lib/utils/news-date';
+import { newsPath } from '@/lib/utils/news-url';
 
 interface NewsCardProps {
   news: {
@@ -33,22 +36,11 @@ interface NewsCardProps {
     publishedAt?: Date | null;
   };
   isAdmin?: boolean;
+  /** Rendered inside a third-party iframe — links must escape the frame. */
+  embeded?: boolean;
 }
 
-/**
- * Absolute publication date, spelled out. "Hoy"/"Ayer" replace the date for
- * recent items, where the weekday matters more than the numeral.
- */
-function formatAbsoluteDate(date: Date): string {
-  const time = format(date, 'HH:mm', { locale: es });
-
-  if (isToday(date)) return `Hoy, ${time}`;
-  if (isYesterday(date)) return `Ayer, ${time}`;
-
-  return format(date, "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es });
-}
-
-export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
+export function NewsCard({ news, isAdmin = false, embeded = false }: NewsCardProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUnpublishing, setIsUnpublishing] = useState(false);
@@ -63,6 +55,15 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
   // Sala de Prensa links point at Word documents rather than web pages, so the
   // action has to promise a download instead of a page.
   const isDownload = /\.(docx?|pdf|xlsx?)(\?|$)/i.test(news.sourceUrl ?? '');
+
+  // Every item gets its own shareable page. This card only ever renders
+  // published rows (the admin queue has its own card), so the route resolves
+  // whether or not an admin is signed in.
+  const detailPath = news.id ? newsPath({ id: news.id, title: news.title }) : null;
+
+  // In an embed the feed lives in someone else's iframe, so navigating in
+  // place would strand the reader inside a frame they can't get out of.
+  const linkTarget = embeded ? { target: '_blank', rel: 'noopener' } : {};
 
   const flags = news.flags || [];
   const primaryFlag = getPrimaryFlag(flags);
@@ -183,10 +184,20 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
 
       {/* Headline + excerpt */}
       <div className="space-y-2 px-5 p-4">
-        {/* Not a link: the full text is on the card now, and the action bar
-            below carries the deliberate route out to the official source. */}
         <h3 className="line-clamp-3 text-lg leading-snug font-semibold text-balance">
-          {news.title}
+          {detailPath ? (
+            // Whole-card links would swallow the "Ver más" expander and the
+            // action buttons, so only the headline navigates.
+            <Link
+              href={detailPath}
+              {...linkTarget}
+              className="underline-offset-4 hover:underline"
+            >
+              {news.title}
+            </Link>
+          ) : (
+            news.title
+          )}
         </h3>
 
         <NewsContent content={news.content} />
@@ -230,6 +241,15 @@ export function NewsCard({ news, isAdmin = false }: NewsCardProps) {
                 {isDeleting ? 'Eliminando...' : 'Eliminar'}
               </Button>
             </>
+          )}
+
+          {detailPath && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link href={detailPath} {...linkTarget}>
+                Ver noticia
+                <ArrowRight />
+              </Link>
+            </Button>
           )}
 
           {news.sourceUrl && (

@@ -127,7 +127,7 @@ export function NewsFeed({ initialNews, embeded = false, isAdmin = false }: News
         {allNews.length > 0 ? (
           <>
             {allNews.map((item) => (
-              <NewsCard key={item.id} news={item} isAdmin={isAdmin} />
+              <NewsCard key={item.id} news={item} isAdmin={isAdmin} embeded={embeded} />
             ))}
 
             {/* Observer target - triggers load when visible */}
