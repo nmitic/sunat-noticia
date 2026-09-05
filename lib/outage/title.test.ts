@@ -1,8 +1,5 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-
 import { displayTitle, outageTitle } from './title';
 import type { StructuredOutage } from './types';
 
@@ -74,15 +71,15 @@ describe('outageTitle — when', () => {
     assert.equal(title, 'Intermitencia en SOL — en curso');
   });
 
-  it('formats the start the same way the summary panel does', () => {
-    // Both go through date-fns with the `es` locale, so the headline and the
-    // panel directly beneath it can never disagree about the same instant.
+  it('states the start in Lima time, whatever zone the server runs in', () => {
+    // Asserted as a literal rather than recomputed with the same helper: the
+    // point is that 21:00 in the notice reads as 21:00 here, and a formatter
+    // using the server clock would render this instant as 02:00 on the 6th.
     const startsAt = '2025-09-05T21:00:00-05:00';
-    const expected = `${format(new Date(startsAt), "d 'de' MMMM, HH:mm", { locale: es })} h`;
 
     assert.equal(
       outageTitle(outage({ services: ['SOL'], startsAt })),
-      `Mantenimiento programado en SOL — ${expected}`
+      'Mantenimiento programado en SOL — 5 de septiembre, 21:00 h'
     );
   });
 

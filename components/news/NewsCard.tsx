@@ -17,12 +17,12 @@ import { ShareButton } from '@/components/news/ShareButton';
 import { displayTitle } from '@/lib/outage/title';
 import type { StructuredOutage } from '@/lib/outage/types';
 import { getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, ExternalLink, BadgeCheck, Download, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { formatAbsoluteDate } from '@/lib/utils/news-date';
+import { formatAbsoluteDate, formatFullDate } from '@/lib/utils/news-date';
 import { newsPath } from '@/lib/utils/news-url';
 
 interface NewsCardProps {
@@ -90,7 +90,7 @@ export function NewsCard({ news, embeded = false }: NewsCardProps) {
   const publishedAt = news.publishedAt ? new Date(news.publishedAt) : null;
   const dateTitle =
     publishedAt && Math.abs(publishedAt.getTime() - originalDate.getTime()) > 60 * 60 * 1000
-      ? `Publicado en SUNAT Noticias el ${format(publishedAt, "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })}`
+      ? `Publicado en SUNAT Noticias el ${formatFullDate(publishedAt)}`
       : undefined;
 
   return (

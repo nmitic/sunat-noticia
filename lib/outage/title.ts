@@ -1,6 +1,8 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+import { toLima } from '@/lib/utils/news-date';
+
 import type { StructuredOutage } from './types';
 
 /**
@@ -73,8 +75,8 @@ function describeWhen(data: StructuredOutage): string | null {
   const starts = new Date(data.startsAt);
   if (Number.isNaN(starts.getTime())) return null;
 
-  // date-fns with the `es` locale, matching every other date on the site — the
-  // summary panel right below this headline formats the same instant, and the
-  // two must not disagree about how to spell the month.
-  return `${format(starts, "d 'de' MMMM, HH:mm", { locale: es })} h`;
+  // Formatted in Lima, like every other date on the site — the summary panel
+  // right below this headline renders the same instant, and the two must not
+  // disagree about either the hour or how to spell the month.
+  return `${format(toLima(starts), "d 'de' MMMM, HH:mm", { locale: es })} h`;
 }
