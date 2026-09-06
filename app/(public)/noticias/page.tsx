@@ -1,7 +1,6 @@
-import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Activity, RadioTower } from 'lucide-react';
+import { RadioTower } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 
 import { NewsFeed } from '@/components/news/NewsFeed';
@@ -13,7 +12,6 @@ import {
   EmailSubscriptionCard,
 } from '@/components/layout/EmailSubscriptionForm';
 import { PerunioAd } from '@/components/ads/PerunioAd';
-import { Button } from '@/components/ui/button';
 import { authOptions } from '@/lib/auth/config';
 import { queryPublishedNews, type NewsRow } from '@/lib/api/news-query';
 import { UI_TEXT } from '@/lib/utils/constants';
@@ -74,13 +72,6 @@ export default async function NoticiasPage({ searchParams }: PageProps) {
         <div className="flex flex-col gap-8 lg:flex-row">
           {/* Main content area */}
           <div className="min-w-0 flex-1">
-            <Button variant="ghost" size="sm" asChild className="-ml-3 mb-4">
-              <Link href="/">
-                <Activity />
-                {UI_TEXT.noticias.backToStatus}
-              </Link>
-            </Button>
-
             <div className="space-y-6">
               <header className="space-y-3">
                 <h1 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl">

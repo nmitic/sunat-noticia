@@ -3,6 +3,11 @@ import type { OutageKind } from '@/lib/outage/types';
 import type { StatusLevel } from '@/lib/outage/status';
 
 export const UI_TEXT = {
+  // The header's two sections. Short enough to sit side by side on a phone.
+  nav: {
+    status: 'Estado',
+    news: 'Noticias',
+  },
   categories: {
     OFICIAL: 'Oficial',
   },
@@ -142,8 +147,11 @@ export const UI_TEXT = {
     },
     latest: {
       heading: 'Últimas noticias',
+      description:
+        'Comunicados, avisos y alertas de fuentes oficiales de SUNAT, más allá de las caídas de sistema.',
       empty: 'No hay noticias disponibles',
       viewAll: 'Ver todas las noticias',
+      emptyCta: 'Ir a las noticias',
     },
     error: 'No se pudo consultar el estado de los servicios. Inténtalo más tarde.',
   },
@@ -151,7 +159,6 @@ export const UI_TEXT = {
     title: 'Noticias de SUNAT',
     description:
       'Comunicados, avisos y alertas de fuentes oficiales de SUNAT, actualizados automáticamente.',
-    backToStatus: 'Ver el estado de SUNAT',
   },
   public: {
     subscribe: 'Suscríbete a las noticias de SUNAT',
