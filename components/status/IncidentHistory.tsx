@@ -7,6 +7,7 @@ import { displayTitle } from '@/lib/outage/title';
 import { UI_TEXT } from '@/lib/utils/constants';
 import { formatAbsoluteDate } from '@/lib/utils/news-date';
 import { newsPath } from '@/lib/utils/news-url';
+import { Button } from '../ui/button';
 
 /**
  * The recent record of what has happened to SUNAT.
@@ -18,12 +19,17 @@ import { newsPath } from '@/lib/utils/news-url';
 export function IncidentHistory({ incidents, now }: { incidents: NewsRow[]; now: Date }) {
   return (
     <section aria-labelledby="incidencias-heading" id="incidencias" className="scroll-mt-20">
-      <h2 id="incidencias-heading" className="text-lg font-semibold tracking-tight">
-        {UI_TEXT.status.incidents.heading}
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {UI_TEXT.status.incidents.description}
-      </p>
+      <div className='flex flex-wrap items-start justify-between gap-3'>
+        <h2 id="incidencias-heading" className="text-lg font-semibold tracking-tight">
+          {UI_TEXT.status.incidents.heading}
+        </h2>
+        <Button variant="outline" size="sm" asChild className="shrink-0">
+          <Link href="/noticias?flags=CAIDA_SISTEMA">
+            {UI_TEXT.status.incidents.viewAll}
+            <ArrowRight />
+          </Link>
+        </Button>
+      </div>
 
       {incidents.length > 0 ? (
         <>
@@ -49,14 +55,6 @@ export function IncidentHistory({ incidents, now }: { incidents: NewsRow[]; now:
               );
             })}
           </ol>
-
-          <Link
-            href="/noticias?flags=CAIDA_SISTEMA"
-            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {UI_TEXT.status.incidents.viewAll}
-            <ArrowRight className="size-3.5" aria-hidden="true" />
-          </Link>
         </>
       ) : (
         <div className="mt-4 rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center">
