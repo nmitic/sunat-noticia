@@ -15,12 +15,9 @@ import { IncidentHistory } from '@/components/status/IncidentHistory';
 import { LatestNewsStrip } from '@/components/status/LatestNewsStrip';
 import { authOptions } from '@/lib/auth/config';
 import { queryPublishedNews, type NewsRow } from '@/lib/api/news-query';
-import {
-  queryLastNewsAt,
-  queryLatestNonOutageNews,
-  queryOutageCandidates,
-} from '@/lib/api/status-query';
-import { computeStatus, partitionIncidents, type SiteStatus } from '@/lib/outage/status';
+import { loadSiteStatus } from '@/lib/api/status';
+import { queryLatestNonOutageNews } from '@/lib/api/status-query';
+import { partitionIncidents, type SiteStatus } from '@/lib/outage/status';
 import { UI_TEXT } from '@/lib/utils/constants';
 
 export const dynamic = 'force-dynamic';
@@ -71,25 +68,26 @@ export default async function StatusPage({ searchParams }: PageProps) {
 
   try {
     // Concurrent, because four serial round trips would show up in TTFB on a
-    // force-dynamic page. The pool caps at 3, so one of these queues briefly.
-    const [candidates, incidentRows, latestRows, lastAt] = await Promise.all([
-      queryOutageCandidates(),
+    // force-dynamic page — `loadSiteStatus` is itself two of the four, so it
+    // joins the same Promise.all rather than being awaited ahead of it. The
+    // pool caps at 3, so one of these queues briefly.
+    const [loaded, incidentRows, latestRows] = await Promise.all([
+      loadSiteStatus(now),
       // Fetched wider than the five shown: announced-but-not-started windows are
       // split off below, and they must not eat the history's slots.
       queryPublishedNews({ flags: 'CAIDA_SISTEMA', limit: 15 }),
       queryLatestNonOutageNews(5),
-      queryLastNewsAt(),
     ]);
 
-    status = computeStatus(candidates.items, now);
-    unreviewedCount = candidates.unreviewedCount;
+    status = loaded.status;
+    lastNewsAt = loaded.lastNewsAt;
+    unreviewedCount = loaded.unreviewedCount;
 
     const partitioned = partitionIncidents(incidentRows.news, now);
     upcoming = partitioned.upcoming.slice(0, 5);
     incidents = partitioned.history.slice(0, 5);
 
     latest = latestRows;
-    lastNewsAt = lastAt;
   } catch (error) {
     console.error('Status query error:', error);
     dbError = true;

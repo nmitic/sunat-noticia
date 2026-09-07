@@ -19,6 +19,16 @@ const nextConfig: NextConfig = {
         destination: "/noticias",
         permanent: true,
       },
+      // The feed embed used to be the bare /embeded, back when it was the only
+      // one. Now that /embeded/estado exists the two are named for what they
+      // serve, and this keeps every link already handed out working — including
+      // the most guessable URL in the module. Query values ride along, so
+      // ?category=OFICIAL survives the hop.
+      {
+        source: "/embeded",
+        destination: "/embeded/noticias",
+        permanent: true,
+      },
     ];
   },
   async headers() {

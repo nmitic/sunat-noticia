@@ -36,8 +36,10 @@ export default async function EmbeddedPage({ searchParams }: PageProps) {
     dbError = true;
   }
 
+  // The width lives here rather than in the layout, which is shared with the
+  // estado embed and its narrower panel.
   return (
-    <>
+    <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6 lg:px-8">
       {dbError ? (
         <div className="rounded-lg border border-destructive bg-destructive/5 p-8 text-center">
           <h3 className="text-lg font-semibold text-destructive mb-2">Error</h3>
@@ -48,6 +50,6 @@ export default async function EmbeddedPage({ searchParams }: PageProps) {
       ) : (
         <NewsFeed key={feedKey} initialNews={news} embeded />
       )}
-    </>
+    </div>
   );
 }

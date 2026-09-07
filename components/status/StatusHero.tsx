@@ -39,16 +39,36 @@ export function StatusHero({
   status,
   lastNewsAt,
   unreviewedCount,
+  embeded = false,
 }: {
   status: SiteStatus;
   lastNewsAt: Date | null;
   unreviewedCount: number;
+  /**
+   * Rendered inside someone else's iframe. Links open in a new tab — navigating
+   * in place would strand the reader in a frame they cannot get out of — and the
+   * headline drops a level so it does not inject a second top-level heading into
+   * the host page's outline. Mirrors `NewsCard`'s prop of the same name.
+   */
+  embeded?: boolean;
 }) {
   const { level, primary } = status;
   const label = getStatusLabel(level);
   const dotClasses = getStatusDotClasses(level);
   const isOperational = level === 'operativo';
   const alsoActive = status.active.length - 1;
+
+  // The same escape hatch `NewsCard` uses; see the prop's comment above.
+  const linkTarget = embeded ? { target: '_blank' as const, rel: 'noopener' } : {};
+
+  // The embed renders no IncidentHistory, so a bare `#incidencias` fragment
+  // would find no target and silently scroll nowhere — a visible affordance
+  // that does nothing. Send it to the full status page, which has that section.
+  const alsoActiveHref = embeded ? '/#incidencias' : '#incidencias';
+
+  // `AffectedServices` already renders an h2, so the embed's outline stays
+  // consistent at one level down.
+  const Heading = embeded ? 'h2' : 'h1';
 
   return (
     <section
@@ -79,12 +99,12 @@ export function StatusHero({
       </div>
 
       <div className="px-5 py-6 sm:px-8">
-        <h1
+        <Heading
           id="estado-sunat"
           className="text-3xl font-bold tracking-tight text-balance sm:text-4xl"
         >
           {label.title}
-        </h1>
+        </Heading>
 
         <p className="mt-3 max-w-2xl text-base text-muted-foreground sm:text-lg">
           {label.subtitle}
@@ -102,7 +122,7 @@ export function StatusHero({
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <Button asChild>
-                <Link href={newsPath(primary)}>
+                <Link href={newsPath(primary)} {...linkTarget}>
                   {UI_TEXT.status.viewNotice}
                   <ExternalLink />
                 </Link>
@@ -110,7 +130,8 @@ export function StatusHero({
 
               {alsoActive > 0 && (
                 <Link
-                  href="#incidencias"
+                  href={alsoActiveHref}
+                  {...linkTarget}
                   className="text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
                 >
                   {pluralize(
@@ -147,6 +168,7 @@ export function StatusHero({
             )}{' '}
             <Link
               href="/noticias?flags=CAIDA_SISTEMA"
+              {...linkTarget}
               className="font-medium underline underline-offset-4"
             >
               {UI_TEXT.status.pendingReviewLink}

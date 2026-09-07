@@ -87,8 +87,26 @@ The app will be available at http://localhost:3000
 ## Access Points
 
 ### Public Pages
-- **Home**: http://localhost:3000/
-- **Embedded**: http://localhost:3000/embedded
+- **Estado** (home): http://localhost:3000/
+- **Noticias**: http://localhost:3000/noticias
+- **Embed — noticias**: http://localhost:3000/embeded/noticias
+- **Embed — estado**: http://localhost:3000/embeded/estado
+
+Bare `/embeded` 308s to `/embeded/noticias`, which is where the feed embed used
+to live when it was the only one.
+
+Note the embed routes are spelled `embeded`, with one "d". That is the deployed
+spelling; renaming it breaks links already handed out, so do not "fix" it.
+
+### Public API
+
+CORS-gated to `ALLOWED_PUBLIC_ORIGINS` in `lib/api/cors.ts` — any other origin,
+or a request with none, gets a 403:
+
+```bash
+curl -H "Origin: http://localhost:5173" http://localhost:3000/api/public/status
+curl -H "Origin: http://localhost:5173" http://localhost:3000/api/public/news
+```
 
 ### Admin Panel
 - **Login**: http://localhost:3000/admin/login

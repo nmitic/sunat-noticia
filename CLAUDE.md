@@ -39,11 +39,13 @@ Database scripts are environment-scoped — there is no bare `db:generate`/`db:m
 sunat-noticias/
 ├── app/                              # Next.js App Router
 │   ├── (public)/                     # Public routes group
-│   │   ├── layout.tsx                # Public layout (header, footer)
-│   │   ├── page.tsx                  # Main news feed
-│   │   └── embedded/
-│   │       ├── layout.tsx            # Embedded layout (no header/footer)
-│   │       └── page.tsx              # Embedded news feed
+│   │   ├── layout.tsx                # Public shell — NO header/footer (see below)
+│   │   ├── page.tsx                  # Status page ("¿SUNAT está caído?")
+│   │   ├── noticias/                 # News feed + per-article pages
+│   │   └── embeded/                  # NOTE: one "d". This is the live spelling.
+│   │       ├── layout.tsx            # Background only; width belongs to pages
+│   │       ├── noticias/page.tsx     # /embeded/noticias — chrome-free feed
+│   │       └── estado/page.tsx       # /embeded/estado — chrome-free status
 │   ├── admin/                        # Admin routes (protected)
 │   │   ├── layout.tsx                # Admin layout with nav/auth check
 │   │   ├── login/
@@ -161,10 +163,53 @@ sunat-noticias/
 - Flag badges with color coding
 - Email signup form (persistence only, no delivery)
 
-#### Embedded Mode
-- `/embedded` route shows feed without header/footer
-- Same real-time updates as public feed
-- Can be embedded in iframe
+#### Embed Mode
+
+Two chrome-free routes meant to be dropped into a third-party iframe. Both spell
+it **`embeded`, with one "d"** — that is the deployed spelling, so renaming it
+breaks every link already handed out. Do not "fix" it.
+
+- **`/embeded/noticias`** — the news feed. Accepts `?category=` and `?flags=`.
+  Keeps the feed's SSE updates. Bare `/embeded` 308s here (it was the feed's URL
+  back when it was the only embed), so old links keep working.
+- **`/embeded/estado`** — the status panel: `StatusHero` + `AffectedServices`
+  only. No incident history, no schedule, no news strip — a host page gives this
+  a fixed slot, so anything below the fold would never be seen. Static per load
+  (no polling, no SSE) and `noindex`, since it would otherwise compete with `/`.
+
+Both pass an `embeded` prop down so links open in a new tab (`NewsCard.tsx`,
+`StatusHero.tsx`) — navigating in place would strand the reader inside a frame
+they cannot get out of. Hrefs stay **relative**: the iframe's document is served
+from this origin, so they resolve correctly whatever the host page is.
+
+`StatusHero` does two more things in embed mode: it drops its `h1` to an `h2`, so
+it does not inject a second top-level heading into the host's outline, and it
+repoints its `#incidencias` anchor at `/#incidencias`, since the embed renders no
+incident history for a bare fragment to find.
+
+`app/(public)/embeded/layout.tsx` supplies only the background — width and
+padding belong to each page, because the feed wants `max-w-4xl` and the status
+panel `max-w-2xl`, and a nested route cannot escape a parent layout.
+
+Framing is gated by the CSP `frame-ancestors` list in `next.config.ts`.
+
+#### Public JSON API
+
+- **`GET /api/public/news`** — the paginated feed.
+- **`GET /api/public/status`** — the same status the estado embed renders, as
+  JSON: `level`, `primary`, `active`, `upcoming`, `affectedServices`,
+  `evaluatedAt`, `lastNewsAt`, `unreviewedCount` (`PublicStatusResponse` in
+  `lib/api/status.ts`).
+
+Both are CORS-gated to `ALLOWED_PUBLIC_ORIGINS` (`lib/api/cors.ts`); any other
+`Origin` — including none at all — gets a 403. Note that list is duplicated with
+the CSP `frame-ancestors` value in `next.config.ts`, so a new consumer origin
+means editing both.
+
+In the status payload every date is ISO 8601 and each notice `url` is
+**absolute**, unlike the rendered embed — a JSON consumer holds a bare string
+with no document to resolve a path against. `title` is the raw scraped title,
+which can be a sentence fragment; render `structuredData` for the readable one.
 
 ### Spanish Localization
 All UI text in Spanish (Spain variant):
@@ -260,6 +305,9 @@ npm run db:local:studio
 
 | File | Purpose |
 |------|---------|
+| `lib/api/status.ts` | Shared status load (`loadSiteStatus`) + JSON shape for the public API |
+| `lib/api/status-query.ts` | Outage-candidate and freshness queries behind the status page |
+| `lib/outage/status.ts` | Pure status computation — **must stay DB-free** so `npm test` runs with no env |
 | `lib/db/schema.ts` | Drizzle schema definitions (tables, enums) |
 | `lib/db/drizzle.ts` | Drizzle client and connection pool |
 | `drizzle.config.ts` | Drizzle Kit configuration |
@@ -309,7 +357,10 @@ npm run db:local:studio
 - [ ] SSE real-time update works (test in 2 windows)
 - [ ] "Nuevo" badge appears and disappears
 - [ ] Email subscription form works
-- [ ] Embedded mode hides header/footer
+- [ ] Embed mode hides header/footer (`/embeded/noticias` and `/embeded/estado`)
+- [ ] Bare `/embeded` still redirects to `/embeded/noticias`
+- [ ] Embed links open in a new tab instead of navigating inside the frame
+- [ ] `/api/public/status` returns 200 for an allowed `Origin`, 403 otherwise
 - [ ] All text is in Spanish
 
 ### Build Verification
