@@ -172,9 +172,12 @@ breaks every link already handed out. Do not "fix" it.
 - **`/embeded/noticias`** — the news feed. Accepts `?category=` and `?flags=`.
   Keeps the feed's SSE updates. Bare `/embeded` 308s here (it was the feed's URL
   back when it was the only embed), so old links keep working.
-- **`/embeded/estado`** — the status panel: `StatusHero` + `AffectedServices`
-  only. No incident history, no schedule, no news strip — a host page gives this
-  a fixed slot, so anything below the fold would never be seen. Static per load
+- **`/embeded/estado`** — the status panel: `StatusHero` + `AffectedServices` +
+  the next three `UpcomingMaintenance` windows (renders nothing when none are
+  announced). No incident history, no news strip — a host page gives this a
+  fixed slot, so anything below the fold would never be seen. The schedule is
+  there because Perunio's notification panel announces upcoming windows and
+  links to its framed copy of this page. Static per load
   (no polling, no SSE) and `noindex`, since it would otherwise compete with `/`.
 
 Both pass an `embeded` prop down so links open in a new tab (`NewsCard.tsx`,
@@ -199,7 +202,10 @@ Framing is gated by the CSP `frame-ancestors` list in `next.config.ts`.
 - **`GET /api/public/status`** — the same status the estado embed renders, as
   JSON: `level`, `primary`, `active`, `upcoming`, `affectedServices`,
   `evaluatedAt`, `lastNewsAt`, `unreviewedCount` (`PublicStatusResponse` in
-  `lib/api/status.ts`).
+  `lib/api/status.ts`). perunio-frontend polls this: `level` drives the amber
+  estado warning, and `upcoming` drives the "mantenimiento programado" rows in
+  its notification panel — so scheduled work must stay out of `level` until it
+  starts.
 
 Both are CORS-gated to `ALLOWED_PUBLIC_ORIGINS` (`lib/api/cors.ts`); any other
 `Origin` — including none at all — gets a 403. Note that list is duplicated with
