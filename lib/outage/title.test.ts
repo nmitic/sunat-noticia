@@ -63,12 +63,12 @@ describe('outageTitle — services', () => {
 });
 
 describe('outageTitle — when', () => {
-  it('says "en curso" for something already happening', () => {
+  it('never says "en curso" — a headline outlives the incident it names', () => {
     const title = outageTitle(
       outage({ kind: 'INTERMITENCIA', services: ['SOL'], inProgress: true })
     );
 
-    assert.equal(title, 'Intermitencia en SOL — en curso');
+    assert.equal(title, 'Intermitencia en SOL');
   });
 
   it('states the start in Lima time, whatever zone the server runs in', () => {

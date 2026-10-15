@@ -14,9 +14,17 @@ import { CalendarClock, CircleDot, ListChecks, MapPin } from 'lucide-react';
  */
 export function OutageSummary({
   data,
+  ongoing,
   compact = false,
 }: {
   data: StructuredOutage;
+  /**
+   * Whether the incident is running *now* — the caller's `isActive` verdict.
+   * Required, and deliberately not read off `data.inProgress`: that flag says
+   * how the notice was phrased when published, so trusting it would keep an
+   * "En curso" badge on a two-day-old notice the history already calls over.
+   */
+  ongoing: boolean;
   compact?: boolean;
 }) {
   const startsAt = data.startsAt ? new Date(data.startsAt) : null;
@@ -42,7 +50,7 @@ export function OutageSummary({
           {getOutageKindLabel(data.kind)}
         </span>
 
-        {data.inProgress && (
+        {ongoing && (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
             <CircleDot className="size-3" aria-hidden="true" />
             En curso

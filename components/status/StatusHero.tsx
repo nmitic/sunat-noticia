@@ -118,7 +118,8 @@ export function StatusHero({
               {displayTitle(primary)}
             </p>
 
-            <OutageSummary data={primary.structuredData} />
+            {/* `primary` is by construction the active outage that set the level. */}
+            <OutageSummary data={primary.structuredData} ongoing />
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <Button asChild>

@@ -67,9 +67,15 @@ function describeServices(services: string[]): string | null {
   return `${named[0]} y ${named.length - 1} servicios más`;
 }
 
-/** The window, phrased for a headline rather than a data row. */
+/**
+ * The window, phrased for a headline rather than a data row.
+ *
+ * Never "en curso": a headline is fixed text — it lands in tab titles, share
+ * cards and search results — while whether an incident is still running
+ * depends on when you look. Two days on, "— en curso" sat next to a
+ * "Finalizada" badge. Live state belongs to `isActive`, rendered as a badge.
+ */
 function describeWhen(data: StructuredOutage): string | null {
-  if (data.inProgress) return 'en curso';
   if (!data.startsAt) return null;
 
   const starts = new Date(data.startsAt);

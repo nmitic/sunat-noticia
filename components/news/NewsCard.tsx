@@ -14,6 +14,7 @@ import { FlagIcon } from '@/lib/utils/flag-icons';
 import { NewsContent } from '@/components/news/NewsContent';
 import { OutageSummary } from '@/components/news/OutageSummary';
 import { ShareButton } from '@/components/news/ShareButton';
+import { isActive } from '@/lib/outage/status';
 import { displayTitle } from '@/lib/outage/title';
 import type { StructuredOutage } from '@/lib/outage/types';
 import { getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
@@ -155,7 +156,11 @@ export function NewsCard({ news, embeded = false }: NewsCardProps) {
             replaces the prose rather than sitting alongside it. The full text
             is still one click away on the detail page. */}
         {news.structuredData ? (
-          <OutageSummary data={news.structuredData} compact />
+          <OutageSummary
+            data={news.structuredData}
+            ongoing={isActive(news.structuredData, new Date(), { originalDate })}
+            compact
+          />
         ) : (
           <NewsContent content={news.content} />
         )}

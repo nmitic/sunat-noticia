@@ -37,6 +37,7 @@ import {
 import { getCategoryLabel, getFlagLabel } from '@/lib/utils/constants';
 import { formatAbsoluteDate, formatFullDate } from '@/lib/utils/news-date';
 import { newsPath, parseNewsSlug } from '@/lib/utils/news-url';
+import { isActive } from '@/lib/outage/status';
 import { displayTitle } from '@/lib/outage/title';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
@@ -256,7 +257,10 @@ export default async function NewsDetailPage({ params }: PageProps) {
                   <>
                     {/* Reviewed outage data stands in for the notice: it says
                         the same thing without the paragraph of Spanish. */}
-                    <OutageSummary data={news.structuredData} />
+                    <OutageSummary
+                      data={news.structuredData}
+                      ongoing={isActive(news.structuredData, new Date(), { originalDate })}
+                    />
 
                     {/* The source wording can still carry a detail the
                         extraction does not model, so it stays reachable. */}
