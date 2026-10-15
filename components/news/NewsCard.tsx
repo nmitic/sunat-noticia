@@ -158,7 +158,7 @@ export function NewsCard({ news, embeded = false }: NewsCardProps) {
         {news.structuredData ? (
           <OutageSummary
             data={news.structuredData}
-            ongoing={isActive(news.structuredData, new Date(), { originalDate })}
+            ongoing={isActive(news.structuredData, new Date())}
             compact
           />
         ) : (

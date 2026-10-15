@@ -28,7 +28,11 @@ export function parseOutage(content: string, originalDate: Date): StructuredOuta
     kind,
     startsAt: window.startsAt,
     endsAt: window.endsAt,
-    inProgress: detectInProgress(text, window.startsAt, originalDate),
+    // A notice with no dates is a bare "this is down": en curso until an admin
+    // unticks it. See `isActive`.
+    inProgress:
+      detectInProgress(text, window.startsAt, originalDate) ||
+      (!window.startsAt && !window.endsAt),
     services,
     scope,
     cause,
@@ -386,7 +390,9 @@ const LIST_TERMINATORS = [
   /^agradecemos/i,
   /^disculpe/i,
   /^disculpas/i,
-  /^nuestro\s+equipo/i,
+  /^nuestros?\s+(?:equipos?|t[ée]cnicos|especialistas)/i,
+  /^pedimos/i,
+  /^estamos\s+trabajando/i,
   /^lamentamos/i,
   /^ofrecemos\s+disculpas/i,
   /^gerencia\s+de/i,
@@ -423,6 +429,10 @@ function parseServices(text: string): string[] {
     // names are short and unpunctuated ("Mis declaraciones y pagos"), though
     // some legitimately contain a colon ("Otras solicitudes: Mis Devoluciones").
     if (line.length > 120) break;
+
+    // Likewise a closing sentence: service names never end in a full stop, and
+    // a short abbreviation like "S.A." is not six words long.
+    if (/\.$/.test(line) && line.split(/\s+/).length >= 6) break;
 
     services.push(line);
   }

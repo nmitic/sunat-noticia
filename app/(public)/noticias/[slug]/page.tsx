@@ -259,7 +259,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
                         the same thing without the paragraph of Spanish. */}
                     <OutageSummary
                       data={news.structuredData}
-                      ongoing={isActive(news.structuredData, new Date(), { originalDate })}
+                      ongoing={isActive(news.structuredData, new Date())}
                     />
 
                     {/* The source wording can still carry a detail the

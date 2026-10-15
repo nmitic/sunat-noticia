@@ -61,6 +61,8 @@ export const UI_TEXT = {
       startsAt: 'Inicio',
       endsAt: 'Fin',
       inProgress: 'Ya está ocurriendo',
+      inProgressHint:
+        'Marcado: se muestra como «En curso» hasta que lo desmarques. Desmarcado: solo cuentan las fechas de inicio y fin.',
       services: 'Servicios afectados',
       addService: 'Agregar servicio',
       noServices: 'No se detectaron servicios. Agrégalos manualmente.',

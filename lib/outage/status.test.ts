@@ -46,60 +46,25 @@ function item(patch: Partial<OutageItem> & { structuredData: StructuredOutage })
   };
 }
 
-describe('isActive — a stated end wins over inProgress', () => {
-  it('treats an elapsed window as over even when the notice said it was in progress', () => {
-    const data = outage({
-      inProgress: true,
-      startsAt: hoursFromNow(-30),
-      endsAt: hoursFromNow(-6),
-    });
-
-    assert.equal(isActive(data, NOW), false);
-  });
-
-  it('stays active while inside a stated window', () => {
-    const data = outage({ inProgress: true, startsAt: hoursFromNow(-1), endsAt: hoursFromNow(2) });
-
-    assert.equal(isActive(data, NOW), true);
-  });
-});
-
-describe('isActive — open-ended notices and the staleness guard', () => {
-  it('believes a fresh notice with no window at all', () => {
+describe('isActive — "ya está ocurriendo" is the explicit switch', () => {
+  it('is en curso while ticked, with no dates, however old', () => {
+    // The SIRE case: ticked, no dates, two days old — it was shown as Finalizada.
     assert.equal(isActive(outage({ inProgress: true }), NOW), true);
   });
 
-  it('believes one published two hours ago', () => {
-    const data = outage({ inProgress: true });
-    const originalDate = new Date(NOW.getTime() - 2 * 60 * 60 * 1000);
+  it('is en curso while ticked even past a stated end — only unticking closes it', () => {
+    const data = outage({ inProgress: true, startsAt: hoursFromNow(-30), endsAt: hoursFromNow(-6) });
 
-    assert.equal(isActive(data, NOW, { originalDate }), true);
+    assert.equal(isActive(data, NOW), true);
   });
 
-  it('stops believing one with a start, published forty hours ago', () => {
-    const data = outage({ inProgress: true, startsAt: hoursFromNow(-41) });
-    const originalDate = new Date(NOW.getTime() - 40 * 60 * 60 * 1000);
-
-    assert.equal(isActive(data, NOW, { originalDate }), false);
+  it('is closed once unticked, when there are no dates', () => {
+    assert.equal(isActive(outage({ inProgress: false }), NOW), false);
   });
 
-  it('honours a caller-supplied window', () => {
-    const data = outage({ inProgress: true, startsAt: hoursFromNow(-41) });
-    const originalDate = new Date(NOW.getTime() - 40 * 60 * 60 * 1000);
-
-    assert.equal(isActive(data, NOW, { originalDate, maxAgeHours: 72 }), true);
-  });
-
-  it('keeps a notice with no dates active until an admin sets an end', () => {
-    const originalDate = new Date(NOW.getTime() - 48 * 60 * 60 * 1000);
-
-    assert.equal(isActive(outage({ inProgress: true }), NOW, { originalDate }), true);
-    assert.equal(isActive(outage(), NOW, { originalDate }), true);
-    assert.equal(isActive(outage({ endsAt: hoursFromNow(-1) }), NOW, { originalDate }), false);
-  });
-
-  it('skips the guard entirely when no originalDate is given', () => {
-    assert.equal(isActive(outage({ inProgress: true }), NOW, {}), true);
+  it('falls back to the stated window once unticked', () => {
+    assert.equal(isActive(outage({ startsAt: hoursFromNow(-1), endsAt: hoursFromNow(2) }), NOW), true);
+    assert.equal(isActive(outage({ startsAt: hoursFromNow(-30), endsAt: hoursFromNow(-6) }), NOW), false);
   });
 });
 
@@ -132,11 +97,8 @@ describe('isActive — plain windows', () => {
     assert.equal(isActive(longPast, NOW), false);
   });
 
-  it('treats a notice with no window at all as ongoing, however old', () => {
-    const old = new Date(NOW.getTime() - 40 * 60 * 60 * 1000);
-
-    assert.equal(isActive(outage(), NOW), true);
-    assert.equal(isActive(outage(), NOW, { originalDate: old }), true);
+  it('is not active with no window and the box unticked', () => {
+    assert.equal(isActive(outage(), NOW), false);
   });
 
   it('treats an end with no stated start as active until that end', () => {
@@ -433,14 +395,13 @@ describe('computeStatus', () => {
     assert.deepEqual(status.active, []);
   });
 
-  it('applies the staleness guard to open-ended notices', () => {
-    const stale = item({
-      structuredData: outage({ kind: 'INDISPONIBILIDAD', inProgress: true, startsAt: hoursFromNow(-41) }),
-      originalDate: new Date(NOW.getTime() - 40 * 60 * 60 * 1000),
+  it('keeps a ticked notice active however old it is', () => {
+    const old = item({
+      structuredData: outage({ kind: 'INDISPONIBILIDAD', inProgress: true }),
+      originalDate: new Date(NOW.getTime() - 48 * 60 * 60 * 1000),
     });
 
-    assert.equal(computeStatus([stale], NOW).level, 'operativo');
-    assert.equal(computeStatus([stale], NOW, { maxAgeHours: 72 }).level, 'indisponible');
+    assert.equal(computeStatus([old], NOW).level, 'indisponible');
   });
 
   it('reports back the instant it was given', () => {

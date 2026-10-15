@@ -56,17 +56,6 @@ export interface SiteStatus {
 }
 
 /**
- * How long a "ya está ocurriendo" notice with no stated end is still believed.
- *
- * SUNAT never publishes an all-clear, so without a cap a single forgotten
- * notice would claim an outage forever. Their notices follow a business-day
- * cadence and an open-ended incident is normally resolved the same day; a full
- * day covers an overnight one. Do not lower this below ~12h, or a Friday
- * evening incident would clear itself before Monday's follow-up.
- */
-export const IN_PROGRESS_MAX_AGE_HOURS = 24;
-
-/**
  * How long a window with a start but no end is assumed to run. Covers the usual
  * overnight maintenance shape (21:00 → 07:00) without letting every past
  * announcement stay active indefinitely.
@@ -92,52 +81,26 @@ function instant(iso: string | null): number | null {
 /**
  * Whether the notice describes something happening at `now`.
  *
- * The order of the checks is the whole design:
+ * "Ya está ocurriendo" is the admin's explicit switch: while it is ticked the
+ * incident is en curso, whatever its dates or age; unticking it is how an
+ * incident is closed. SUNAT never publishes an all-clear, so nothing here
+ * expires a ticked notice on a timer, and nothing reads an end date as an
+ * implicit "it's over".
  *
- * A stated end wins over `inProgress`. Read literally, "in progress or inside
- * the window" would let a September notice that was flagged `inProgress` still
- * claim an outage in December. An admin who approved an `endsAt` meant it, so
- * an elapsed window closes the incident no matter how it was phrased.
- *
- * `originalDate` is optional so a caller with only the structured payload can
- * still ask; passing it enables the staleness guard on open-ended notices.
+ * Unticked, only the stated window counts — announced maintenance is en curso
+ * while inside it — and a notice with no dates is not running.
  */
-export function isActive(
-  data: StructuredOutage,
-  now: Date,
-  opts?: { originalDate?: Date; maxAgeHours?: number }
-): boolean {
-  // No dates at all: the notice itself is the report that something is down,
-  // and SUNAT never posts an all-clear. It stays active until an admin sets Fin.
-  if (!data.startsAt && !data.endsAt) return true;
+export function isActive(data: StructuredOutage, now: Date): boolean {
+  if (data.inProgress) return true;
 
   const at = now.getTime();
   const startsAt = instant(data.startsAt);
   const endsAt = instant(data.endsAt);
 
-  // A window that has elapsed is over, whatever the prose said.
-  if (endsAt !== null && at > endsAt) return false;
+  // "Hasta las 18:00" with no start: running until that end.
+  if (startsAt === null) return endsAt !== null && at <= endsAt;
 
-  // SUNAT often states no start at all — the notice itself is the report that
-  // something is happening. Only a *missing* start counts; one that was stated
-  // but cannot be read stays inactive below rather than being guessed at.
-  const noStatedStart = !data.startsAt;
-
-  if (data.inProgress || noStatedStart) {
-    // Still inside a stated window — the check above already proved it.
-    if (endsAt !== null) return true;
-
-    // Open-ended: believe it only while the notice is fresh.
-    const originalDate = opts?.originalDate;
-    if (!originalDate) return true;
-
-    const maxAge = (opts?.maxAgeHours ?? IN_PROGRESS_MAX_AGE_HOURS) * HOUR_MS;
-
-    return at - originalDate.getTime() <= maxAge;
-  }
-
-  // A future window, or one whose start could not be read, is not active.
-  if (startsAt === null || at < startsAt) return false;
+  if (at < startsAt) return false;
 
   // Started, and either still inside the stated window or inside the assumed one.
   return endsAt !== null ? at <= endsAt : at <= startsAt + IMPLICIT_WINDOW_HOURS * HOUR_MS;
@@ -245,16 +208,13 @@ export type IncidentPlacement = 'ongoing' | 'scheduled' | 'past' | 'unreviewed';
 
 export function placeIncident(
   incident: { structuredData: StructuredOutage | null; originalDate: Date },
-  now: Date,
-  opts?: { maxAgeHours?: number }
+  now: Date
 ): IncidentPlacement {
   const data = incident.structuredData;
 
   if (!data) return 'unreviewed';
 
-  if (isActive(data, now, { originalDate: incident.originalDate, maxAgeHours: opts?.maxAgeHours })) {
-    return 'ongoing';
-  }
+  if (isActive(data, now)) return 'ongoing';
 
   return isUpcoming(data, now) ? 'scheduled' : 'past';
 }
@@ -268,14 +228,13 @@ export function placeIncident(
  */
 export function partitionIncidents<T extends { structuredData: StructuredOutage | null; originalDate: Date }>(
   incidents: T[],
-  now: Date,
-  opts?: { maxAgeHours?: number }
+  now: Date
 ): { upcoming: T[]; history: T[] } {
   const upcoming: T[] = [];
   const history: T[] = [];
 
   for (const incident of incidents) {
-    if (placeIncident(incident, now, opts) === 'scheduled') {
+    if (placeIncident(incident, now) === 'scheduled') {
       upcoming.push(incident);
     } else {
       history.push(incident);
@@ -292,18 +251,9 @@ export function partitionIncidents<T extends { structuredData: StructuredOutage 
   return { upcoming, history };
 }
 
-export function computeStatus(
-  items: OutageItem[],
-  now: Date,
-  opts?: { maxAgeHours?: number }
-): SiteStatus {
+export function computeStatus(items: OutageItem[], now: Date): SiteStatus {
   const active = items
-    .filter((item) =>
-      isActive(item.structuredData, now, {
-        originalDate: item.originalDate,
-        maxAgeHours: opts?.maxAgeHours,
-      })
-    )
+    .filter((item) => isActive(item.structuredData, now))
     .sort((a, b) => {
       const bySeverity =
         levelRank(kindToLevel(a.structuredData.kind)) -

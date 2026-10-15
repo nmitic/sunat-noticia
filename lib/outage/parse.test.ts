@@ -200,6 +200,38 @@ Ofrecemos disculpas por los inconvenientes.`;
   });
 });
 
+describe('parseOutage — closing lines SUNAT writes after the list', () => {
+  const content = `Estimado(a) contribuyente:
+
+Le informamos que en estos momentos estamos presentando intermitencia en los siguientes servicios:
+
+Mesa de Partes Virtual - MPV
+Actas electrónicas
+Sistema de Gestión Electrónica de Recursos Impugnatorios - SIGERI
+Expediente Virtual
+Escritos Electrónicos
+
+Nuestros técnicos se encuentran trabajando en la solución.
+
+Pedimos las disculpas por las molestias ocasionadas y agradecemos su comprensión`;
+
+  const result = parseOutage(content, on(2026, 9, 2));
+
+  it('starts ticked as en curso', () => {
+    assert.equal(result.inProgress, true);
+  });
+
+  it('stops at the closing lines, even one with no full stop', () => {
+    assert.deepEqual(result.services, [
+      'Mesa de Partes Virtual - MPV',
+      'Actas electrónicas',
+      'Sistema de Gestión Electrónica de Recursos Impugnatorios - SIGERI',
+      'Expediente Virtual',
+      'Escritos Electrónicos',
+    ]);
+  });
+});
+
 describe('parseOutage — third-party cause', () => {
   const content = `Le informamos que RENIEC ha comunicado la suspensión temporal de sus servicios, lo que viene afectando el aplicativo del Sorteo de Comprobantes de Pago.`;
 

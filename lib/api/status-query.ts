@@ -56,11 +56,11 @@ export async function queryOutageCandidates(params?: {
       and(
         eq(newsTable.published, true),
         IS_OUTAGE,
-        // A notice with no dates stays active until an admin sets Fin (see
-        // `isActive`), so it is fetched whatever its age.
+        // A ticked "ya está ocurriendo" stays en curso until an admin unticks
+        // it (see `isActive`), so it is fetched whatever its age.
         or(
           gte(newsTable.originalDate, since),
-          sql`(${newsTable.structuredData} IS NOT NULL AND ${newsTable.structuredData}->>'startsAt' IS NULL AND ${newsTable.structuredData}->>'endsAt' IS NULL)`
+          sql`${newsTable.structuredData}->>'inProgress' = 'true'`
         )
       )
     )

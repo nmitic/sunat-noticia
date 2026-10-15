@@ -191,13 +191,18 @@ export function OutageExtractor({ newsId, flags, initial = null }: OutageExtract
             </Field>
           </div>
 
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <Checkbox
-              checked={draft.inProgress}
-              onCheckedChange={(checked) => update({ inProgress: checked === true })}
-            />
-            {UI_TEXT.admin.outage.inProgress}
-          </label>
+          <div className="space-y-1">
+            <label className="flex cursor-pointer items-center gap-2 text-sm">
+              <Checkbox
+                checked={draft.inProgress}
+                onCheckedChange={(checked) => update({ inProgress: checked === true })}
+              />
+              {UI_TEXT.admin.outage.inProgress}
+            </label>
+            <p className="pl-6 text-xs text-muted-foreground">
+              {UI_TEXT.admin.outage.inProgressHint}
+            </p>
+          </div>
 
           <Field label={UI_TEXT.admin.outage.services} confidence={draft.confidence.services}>
             <div className="space-y-2">
