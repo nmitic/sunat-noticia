@@ -114,7 +114,12 @@ export function isActive(
   // A window that has elapsed is over, whatever the prose said.
   if (endsAt !== null && at > endsAt) return false;
 
-  if (data.inProgress) {
+  // SUNAT often states no start at all — the notice itself is the report that
+  // something is happening. Only a *missing* start counts; one that was stated
+  // but cannot be read stays inactive below rather than being guessed at.
+  const noStatedStart = !data.startsAt;
+
+  if (data.inProgress || noStatedStart) {
     // Still inside a stated window — the check above already proved it.
     if (endsAt !== null) return true;
 

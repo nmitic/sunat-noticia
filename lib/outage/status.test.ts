@@ -124,8 +124,17 @@ describe('isActive — plain windows', () => {
     assert.equal(isActive(longPast, NOW), false);
   });
 
-  it('is not active with no window and no in-progress phrasing', () => {
-    assert.equal(isActive(outage(), NOW), false);
+  it('treats a notice with no window at all as an ongoing incident while fresh', () => {
+    const stale = new Date(NOW.getTime() - 40 * 60 * 60 * 1000);
+
+    assert.equal(isActive(outage(), NOW), true);
+    assert.equal(isActive(outage(), NOW, { originalDate: NOW }), true);
+    assert.equal(isActive(outage(), NOW, { originalDate: stale }), false);
+  });
+
+  it('treats an end with no stated start as active until that end', () => {
+    assert.equal(isActive(outage({ endsAt: hoursFromNow(3) }), NOW), true);
+    assert.equal(isActive(outage({ endsAt: hoursFromNow(-1) }), NOW), false);
   });
 });
 
