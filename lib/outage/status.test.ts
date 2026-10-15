@@ -76,18 +76,26 @@ describe('isActive — open-ended notices and the staleness guard', () => {
     assert.equal(isActive(data, NOW, { originalDate }), true);
   });
 
-  it('stops believing one published forty hours ago', () => {
-    const data = outage({ inProgress: true });
+  it('stops believing one with a start, published forty hours ago', () => {
+    const data = outage({ inProgress: true, startsAt: hoursFromNow(-41) });
     const originalDate = new Date(NOW.getTime() - 40 * 60 * 60 * 1000);
 
     assert.equal(isActive(data, NOW, { originalDate }), false);
   });
 
   it('honours a caller-supplied window', () => {
-    const data = outage({ inProgress: true });
+    const data = outage({ inProgress: true, startsAt: hoursFromNow(-41) });
     const originalDate = new Date(NOW.getTime() - 40 * 60 * 60 * 1000);
 
     assert.equal(isActive(data, NOW, { originalDate, maxAgeHours: 72 }), true);
+  });
+
+  it('keeps a notice with no dates active until an admin sets an end', () => {
+    const originalDate = new Date(NOW.getTime() - 48 * 60 * 60 * 1000);
+
+    assert.equal(isActive(outage({ inProgress: true }), NOW, { originalDate }), true);
+    assert.equal(isActive(outage(), NOW, { originalDate }), true);
+    assert.equal(isActive(outage({ endsAt: hoursFromNow(-1) }), NOW, { originalDate }), false);
   });
 
   it('skips the guard entirely when no originalDate is given', () => {
@@ -124,12 +132,11 @@ describe('isActive — plain windows', () => {
     assert.equal(isActive(longPast, NOW), false);
   });
 
-  it('treats a notice with no window at all as an ongoing incident while fresh', () => {
-    const stale = new Date(NOW.getTime() - 40 * 60 * 60 * 1000);
+  it('treats a notice with no window at all as ongoing, however old', () => {
+    const old = new Date(NOW.getTime() - 40 * 60 * 60 * 1000);
 
     assert.equal(isActive(outage(), NOW), true);
-    assert.equal(isActive(outage(), NOW, { originalDate: NOW }), true);
-    assert.equal(isActive(outage(), NOW, { originalDate: stale }), false);
+    assert.equal(isActive(outage(), NOW, { originalDate: old }), true);
   });
 
   it('treats an end with no stated start as active until that end', () => {
@@ -428,7 +435,7 @@ describe('computeStatus', () => {
 
   it('applies the staleness guard to open-ended notices', () => {
     const stale = item({
-      structuredData: outage({ kind: 'INDISPONIBILIDAD', inProgress: true }),
+      structuredData: outage({ kind: 'INDISPONIBILIDAD', inProgress: true, startsAt: hoursFromNow(-41) }),
       originalDate: new Date(NOW.getTime() - 40 * 60 * 60 * 1000),
     });
 

@@ -7,7 +7,7 @@
  * that only one caller ever passes.
  */
 
-import { and, desc, eq, gte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, or, sql } from 'drizzle-orm';
 import { db, newsTable } from '@/lib/db/drizzle';
 import { NewsFlag } from '@/lib/db/schema';
 import type { OutageItem } from '@/lib/outage/status';
@@ -52,7 +52,18 @@ export async function queryOutageCandidates(params?: {
       structuredData: newsTable.structuredData,
     })
     .from(newsTable)
-    .where(and(eq(newsTable.published, true), IS_OUTAGE, gte(newsTable.originalDate, since)))
+    .where(
+      and(
+        eq(newsTable.published, true),
+        IS_OUTAGE,
+        // A notice with no dates stays active until an admin sets Fin (see
+        // `isActive`), so it is fetched whatever its age.
+        or(
+          gte(newsTable.originalDate, since),
+          sql`(${newsTable.structuredData} IS NOT NULL AND ${newsTable.structuredData}->>'startsAt' IS NULL AND ${newsTable.structuredData}->>'endsAt' IS NULL)`
+        )
+      )
+    )
     .orderBy(desc(newsTable.originalDate))
     .limit(limit);
 

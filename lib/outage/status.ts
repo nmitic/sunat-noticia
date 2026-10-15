@@ -107,6 +107,10 @@ export function isActive(
   now: Date,
   opts?: { originalDate?: Date; maxAgeHours?: number }
 ): boolean {
+  // No dates at all: the notice itself is the report that something is down,
+  // and SUNAT never posts an all-clear. It stays active until an admin sets Fin.
+  if (!data.startsAt && !data.endsAt) return true;
+
   const at = now.getTime();
   const startsAt = instant(data.startsAt);
   const endsAt = instant(data.endsAt);
